@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Exclude, Expose, Transform } from 'class-transformer';
+import { ObjectId } from 'bson';
 
 @Entity('users')
 export default class User {
@@ -47,8 +48,18 @@ export default class User {
   @Column('number')
   coins = 0;
 
+  @Column('number')
+  range = 50;
+
+  @Column('boolean')
+  email_verified = false;
+
   @Column('boolean')
   administrator = false;
+
+  @Column('array')
+  @Transform(({ value }) => value.map((v: ObjectId) => String(v)))
+  blocked_users: ObjectId[] = [];
 
   @CreateDateColumn()
   created_at: Date;
