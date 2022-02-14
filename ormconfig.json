@@ -1,9 +1,0 @@
-{
-  "type": "mongodb",
-  "host": "localhost",
-  "port": 27017,
-  "database": "waving",
-  "useUnifiedTopology": true,
-  "entities": ["./src/modules/**/infra/typeorm/schemas/*.ts"]
-}
-

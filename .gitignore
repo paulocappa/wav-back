@@ -13,5 +13,4 @@ tmp/*
 tmp/uploads/*
 !tmp/uploads/.gitkeep
 
-# ORM CONFIG
 ormconfig.json
