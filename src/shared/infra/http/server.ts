@@ -9,9 +9,10 @@ import '@shared/infra/typeorm';
 import '@shared/container';
 
 import AppError from '@shared/errors/AppError';
+import FieldError from '@shared/errors/FieldError';
+
 import uploadConfig from '@config/upload';
 
-import FieldError from '@shared/errors/FieldError';
 import routes from './routes';
 
 const server = express();

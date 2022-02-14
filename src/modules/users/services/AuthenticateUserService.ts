@@ -5,9 +5,9 @@ import AppError from '@shared/errors/AppError';
 
 import authConfig from '@config/auth';
 
-import User from '../infra/typeorm/schemas/User';
-import IUsersRepository from '../repositories/IUsersRepository';
-import IHashProvider from '../providers/HashProvider/models/IHashProvider';
+import User from '@modules/users/infra/typeorm/schemas/User';
+import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import IHashProvider from '@modules/users/providers/HashProvider/models/IHashProvider';
 
 interface IRequest {
   email: string;

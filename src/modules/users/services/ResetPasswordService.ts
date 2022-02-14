@@ -4,9 +4,9 @@ import { addHours, isAfter } from 'date-fns';
 import AppError from '@shared/errors/AppError';
 import FieldError from '@shared/errors/FieldError';
 
-import IHashProvider from '../providers/HashProvider/models/IHashProvider';
-import IUsersRepository from '../repositories/IUsersRepository';
-import IUserTokensRepository from '../repositories/IUserTokensRepository';
+import IHashProvider from '@modules/users/providers/HashProvider/models/IHashProvider';
+import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import IUserTokensRepository from '@modules/users/repositories/IUserTokensRepository';
 
 interface IRequest {
   password: string;

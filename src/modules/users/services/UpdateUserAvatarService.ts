@@ -4,8 +4,8 @@ import AppError from '@shared/errors/AppError';
 
 import IStorageProvider from '@shared/container/providers/StorageProvider/models/IStorageProvider';
 
-import User from '../infra/typeorm/schemas/User';
-import IUsersRepository from '../repositories/IUsersRepository';
+import User from '@modules/users/infra/typeorm/schemas/User';
+import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 
 interface IRequest {
   avatarFilename: string;
