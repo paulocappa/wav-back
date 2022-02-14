@@ -1,6 +1,17 @@
+# DEPENDENCIES
 node_modules/
 coverage/
 yarn.lock
-tmp/*
-!tmp/.gitkeep
+
+# ENV
 .env
+
+# UPLOADS
+tmp/*
+!tmp/uploads
+
+tmp/uploads/*
+!tmp/uploads/.gitkeep
+
+# ORM CONFIG
+ormconfig.json

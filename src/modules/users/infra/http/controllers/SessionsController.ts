@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
-import { instanceToInstance } from 'class-transformer';
+import { instanceToPlain } from 'class-transformer';
 
 import AuthenticateUserService from '@modules/users/services/AuthenticateUserService';
+import SessionsValidation from '../validations/SessionsValidation';
 
 class SessionsController {
   public async create(req: Request, res: Response): Promise<Response> {
+    await new SessionsValidation().create(req.body);
+
     const { email, password } = req.body;
 
     const authenticateUserService = container.resolve(AuthenticateUserService);
@@ -15,7 +18,10 @@ class SessionsController {
       password,
     });
 
-    return res.json({ user: instanceToInstance(user), token });
+    return res.json({
+      user: instanceToPlain(user),
+      token,
+    });
   }
 }
 

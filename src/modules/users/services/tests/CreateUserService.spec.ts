@@ -24,6 +24,7 @@ describe('CreateUserService', () => {
     const user = await createUserService.execute({
       name: 'new-user',
       email,
+      username: 'username',
       password: 'newuser',
     });
 
@@ -37,6 +38,7 @@ describe('CreateUserService', () => {
     await createUserService.execute({
       name: 'new-user',
       email,
+      username: 'username',
       password: 'newuser',
     });
 
@@ -44,6 +46,27 @@ describe('CreateUserService', () => {
       createUserService.execute({
         name: 'new-user-2',
         email,
+        username: 'username2',
+        password: 'newuser2',
+      }),
+    ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('should not be able to create a new user with an username in use', async () => {
+    const username = 'newuserusername';
+
+    await fakeUsersRepository.create({
+      name: 'new-user',
+      email: 'emailuser@email.com',
+      username,
+      password: 'newuser',
+    });
+
+    await expect(
+      createUserService.execute({
+        name: 'new-user-2',
+        email: 'emailuser2@email.com',
+        username,
         password: 'newuser2',
       }),
     ).rejects.toBeInstanceOf(AppError);

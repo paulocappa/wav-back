@@ -2,13 +2,14 @@ import { injectable, inject } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
 
-import User from '../infra/typeorm/entities/User';
+import User from '../infra/typeorm/schemas/User';
 import IUsersRepository from '../repositories/IUsersRepository';
 import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 
 interface IRequest {
   name: string;
   email: string;
+  username: string;
   password: string;
 }
 
@@ -22,11 +23,22 @@ class CreateUserService {
     private hashProvider: IHashProvider,
   ) {}
 
-  public async execute({ name, email, password }: IRequest): Promise<User> {
-    const userExists = await this.usersRepository.findByEmail(email);
+  public async execute({
+    name,
+    email,
+    username,
+    password,
+  }: IRequest): Promise<User> {
+    const emailInUse = await this.usersRepository.findByEmail(email);
 
-    if (userExists) {
+    if (emailInUse) {
       throw new AppError('This email is alredy in use');
+    }
+
+    const usernameInUse = await this.usersRepository.findByUsername(username);
+
+    if (usernameInUse) {
+      throw new AppError('This username is alredy in use');
     }
 
     const hashedPassword = await this.hashProvider.generateHash(password);
@@ -34,6 +46,7 @@ class CreateUserService {
     const user = await this.usersRepository.create({
       name,
       email,
+      username,
       password: hashedPassword,
     });
 

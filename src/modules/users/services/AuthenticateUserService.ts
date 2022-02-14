@@ -5,7 +5,7 @@ import AppError from '@shared/errors/AppError';
 
 import authConfig from '@config/auth';
 
-import User from '../infra/typeorm/entities/User';
+import User from '../infra/typeorm/schemas/User';
 import IUsersRepository from '../repositories/IUsersRepository';
 import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 
@@ -48,7 +48,7 @@ class AuthenticateUserService {
     const { secret, expiresIn } = authConfig.jwt;
 
     const token = sign({}, secret, {
-      subject: user.id,
+      subject: String(user.id),
       expiresIn,
     });
 

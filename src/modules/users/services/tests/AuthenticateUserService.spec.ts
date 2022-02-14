@@ -24,6 +24,7 @@ describe('AuthenticateUserService', () => {
 
     const user = await fakeUsersRepository.create({
       name: 'user-fake-1',
+      username: 'userfake',
       email,
       password,
     });
@@ -52,6 +53,7 @@ describe('AuthenticateUserService', () => {
 
     await fakeUsersRepository.create({
       name: 'user-fake-1',
+      username: 'userfake',
       email,
       password,
     });
