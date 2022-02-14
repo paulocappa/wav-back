@@ -31,7 +31,7 @@ class SendForgotPasswordMailService {
       throw new AppError('User not found');
     }
 
-    const { token } = await this.userTokensRepository.generate(user.id);
+    const { token } = await this.userTokensRepository.generate(String(user.id));
 
     const forgotPasswordTemplate = path.resolve(
       __dirname,

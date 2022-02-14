@@ -2,6 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { addHours, isAfter } from 'date-fns';
 
 import AppError from '@shared/errors/AppError';
+import FieldError from '@shared/errors/FieldError';
 
 import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 import IUsersRepository from '../repositories/IUsersRepository';
@@ -41,6 +42,10 @@ class ResetPasswordService {
 
     if (!user) {
       throw new AppError('User not found');
+    }
+
+    if (password !== confirm_password) {
+      throw new FieldError('confirm_password', 'Passwords does not match');
     }
 
     const tokenCreatedAt = userToken.created_at;

@@ -2,7 +2,9 @@ import FakeUserTokensRepository from '@modules/users/repositories/fakes/FakeUser
 import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
 import ResetPasswordService from '@modules/users/services/ResetPasswordService';
+
 import AppError from '@shared/errors/AppError';
+import FieldError from '@shared/errors/FieldError';
 
 let fakeUsersRepository: FakeUsersRepository;
 let fakeUserTokensRepository: FakeUserTokensRepository;
@@ -72,7 +74,7 @@ describe('ResetPasswordService', () => {
       name: 'User',
       username: 'user',
       email: 'user@gmail.com',
-      password: 'afonso123',
+      password: 'user123',
     });
 
     const { token } = await fakeUserTokensRepository.generate(String(user.id));
@@ -90,5 +92,24 @@ describe('ResetPasswordService', () => {
         confirm_password: 'newpassword123',
       }),
     ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('should not be able to reset the password if confirm password does not match', async () => {
+    const user = await fakeUsersRepository.create({
+      name: 'User',
+      username: 'user',
+      email: 'user@gmail.com',
+      password: 'user123',
+    });
+
+    const { token } = await fakeUserTokensRepository.generate(String(user.id));
+
+    await expect(
+      resetPasswordService.execute({
+        token,
+        password: 'newpassword123',
+        confirm_password: 'wrongpassword',
+      }),
+    ).rejects.toBeInstanceOf(FieldError);
   });
 });
