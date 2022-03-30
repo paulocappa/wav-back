@@ -7,8 +7,12 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import uploadConfig from '@config/upload';
+
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { ObjectId } from 'bson';
+
+import generateRandomNumber from '@shared/utils/generateRandomNumber';
 
 @Entity('users')
 export default class User {
@@ -51,9 +55,15 @@ export default class User {
   @Column('number')
   range = 50;
 
+  @Column()
+  @Exclude()
+  code: number = generateRandomNumber();
+
   @Column('boolean')
+  @Exclude()
   email_verified = false;
 
+  @Exclude()
   @Column('boolean')
   administrator = false;
 
@@ -69,6 +79,17 @@ export default class User {
 
   @Expose({ name: 'avatar_url' })
   get avatar_url(): string | null {
-    return this.avatar ? `${process.env.API_URL}/file/${this.avatar}` : null;
+    if (!this.avatar) return null;
+
+    const { driver, config } = uploadConfig;
+
+    switch (driver) {
+      case 'disk':
+        return `${process.env.API_URL}/file/${this.avatar}`;
+      case 's3':
+        return `${config.s3.url}/${this.avatar}`;
+      default:
+        return null;
+    }
   }
 }

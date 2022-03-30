@@ -5,7 +5,7 @@ import AppError from '@shared/errors/AppError';
 
 import authConfig from '@config/auth';
 
-export default function ensureAuthenticated(
+export default function ensureIsAuthenticated(
   req: Request,
   _: Response,
   next: NextFunction,
