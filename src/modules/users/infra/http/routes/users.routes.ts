@@ -9,6 +9,7 @@ import ensureEmailIsVerified from '@modules/users/infra/http/middlewares/ensureE
 
 import UsersController from '../controllers/UsersController';
 import AvatarController from '../controllers/AvatarController';
+import EmailController from '../controllers/EmailController';
 
 const upload = multer(uploadConfig.multer);
 
@@ -16,8 +17,10 @@ const usersRouter = Router();
 
 const usersController = new UsersController();
 const avatarController = new AvatarController();
+const emailController = new EmailController();
 
 usersRouter.post('/', usersController.create);
+usersRouter.put('/email', emailController.update);
 
 usersRouter.use(ensureIsAuthenticated);
 usersRouter.use(ensureEmailIsVerified);

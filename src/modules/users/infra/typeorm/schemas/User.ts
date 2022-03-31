@@ -14,6 +14,21 @@ import { ObjectId } from 'bson';
 
 import generateRandomNumber from '@shared/utils/generateRandomNumber';
 
+export type USER_BADGES = 'VERIFIED' | 'STREAMER' | 'YOUTUBER' | 'INFLUENCER';
+
+interface IBanInfo {
+  banned: boolean;
+  until: Date | null;
+  reason: string | null;
+}
+
+interface IPushSettings {
+  world: boolean;
+  follower: boolean;
+  reactions: boolean;
+  direct: boolean;
+  new_follower: boolean;
+}
 @Entity('users')
 export default class User {
   @ObjectIdColumn()
@@ -60,16 +75,36 @@ export default class User {
   code: number = generateRandomNumber();
 
   @Column('boolean')
-  @Exclude()
   email_verified = false;
 
   @Exclude()
   @Column('boolean')
   administrator = false;
 
+  @Column('string')
+  language = 'pt';
+
+  @Column('array')
+  badges: USER_BADGES[] = [];
+
+  @Column('json')
+  ban_info: IBanInfo = { banned: false, until: null, reason: null };
+
+  @Column('json')
+  push_settings: IPushSettings = {
+    world: true,
+    follower: true,
+    direct: true,
+    reactions: true,
+    new_follower: true,
+  };
+
   @Column('array')
   @Transform(({ value }) => value.map((v: ObjectId) => String(v)))
   blocked_users: ObjectId[] = [];
+
+  @Column('datetime')
+  last_action: Date = new Date();
 
   @CreateDateColumn()
   created_at: Date;
