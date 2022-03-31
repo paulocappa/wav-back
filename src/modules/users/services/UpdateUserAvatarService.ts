@@ -6,6 +6,7 @@ import IStorageProvider from '@shared/container/providers/StorageProvider/models
 
 import User from '@modules/users/infra/typeorm/schemas/User';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
 
 interface IRequest {
   avatarFilename: string;
@@ -20,6 +21,9 @@ class CreateUserService {
 
     @inject('StorageProvider')
     private storageProvider: IStorageProvider,
+
+    @inject('CacheProvider')
+    private cacheProvider: ICacheProvider,
   ) {}
 
   public async execute({ user_id, avatarFilename }: IRequest): Promise<User> {
@@ -38,6 +42,8 @@ class CreateUserService {
     user.avatar = filename;
 
     await this.usersRepository.save(user);
+
+    await this.cacheProvider.invalidate(`user-info:${user.id}`);
 
     return user;
   }

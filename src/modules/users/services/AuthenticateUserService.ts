@@ -6,8 +6,10 @@ import AppError from '@shared/errors/AppError';
 import authConfig from '@config/auth';
 
 import User from '@modules/users/infra/typeorm/schemas/User';
+
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import IHashProvider from '@modules/users/providers/HashProvider/models/IHashProvider';
+import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
 
 interface IRequest {
   email: string;
@@ -27,6 +29,9 @@ class AuthenticateUserService {
 
     @inject('HashProvider')
     private hashProvider: IHashProvider,
+
+    @inject('CacheProvider')
+    private cacheProvider: ICacheProvider,
   ) {}
 
   public async execute({ email, password }: IRequest): Promise<IResponse> {
@@ -51,6 +56,8 @@ class AuthenticateUserService {
       subject: String(user.id),
       expiresIn,
     });
+
+    await this.cacheProvider.save(`user-info:${user.id}`, user);
 
     return {
       user,
