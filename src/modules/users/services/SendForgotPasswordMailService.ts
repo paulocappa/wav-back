@@ -1,12 +1,11 @@
 import { inject, injectable } from 'tsyringe';
 
-import path from 'path';
-
 import IMailProvider from '@shared/container/providers/MailProvider/models/IMailProvider';
 import AppError from '@shared/errors/AppError';
 
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import IUserTokensRepository from '@modules/users/repositories/IUserTokensRepository';
+import IQueueProvider from '@shared/container/providers/QueueProvider/models/IQueueProvider';
 
 interface IRequest {
   email: string;
@@ -23,6 +22,9 @@ class SendForgotPasswordMailService {
 
     @inject('MailProvider')
     private mailProvider: IMailProvider,
+
+    @inject('QueueProvider')
+    private queueProvider: IQueueProvider,
   ) {}
 
   public async execute({ email }: IRequest): Promise<void> {
@@ -34,26 +36,10 @@ class SendForgotPasswordMailService {
 
     const { token } = await this.userTokensRepository.generate(String(user.id));
 
-    const forgotPasswordTemplate = path.resolve(
-      __dirname,
-      '..',
-      'views',
-      'forgot_password.hbs',
-    );
+    const { name } = user;
 
-    await this.mailProvider.sendMail({
-      to: {
-        name: user.name,
-        email: user.email,
-      },
-      subject: '[Waving] Recuperação de senha',
-      templateData: {
-        file: forgotPasswordTemplate,
-        variables: {
-          name: user.name,
-          link: `http://localhost:3000/reset_password?t=${token}`,
-        },
-      },
+    await this.queueProvider.add('RecoverPassMail', {
+      user: { email, name, token },
     });
   }
 }

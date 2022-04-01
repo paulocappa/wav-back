@@ -5,6 +5,7 @@ import AppError from '@shared/errors/AppError';
 import User from '@modules/users/infra/typeorm/schemas/User';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import IHashProvider from '@modules/users/providers/HashProvider/models/IHashProvider';
+import IQueueProvider from '@shared/container/providers/QueueProvider/models/IQueueProvider';
 
 interface IRequest {
   name: string;
@@ -21,6 +22,9 @@ class CreateUserService {
 
     @inject('HashProvider')
     private hashProvider: IHashProvider,
+
+    @inject('QueueProvider')
+    private queueProvider: IQueueProvider,
   ) {}
 
   public async execute({
@@ -49,6 +53,8 @@ class CreateUserService {
       username,
       password: hashedPassword,
     });
+
+    await this.queueProvider.add('RegistrationMail', { user });
 
     return user;
   }
