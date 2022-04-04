@@ -25,7 +25,7 @@ class GetUserInfoService {
     if (!user) {
       user = await this.usersRepository.findById(user_id);
 
-      await this.cacheProvider.save(`user-info:${user_id}`, user);
+      await this.cacheProvider.save<User>(`user-info:${user_id}`, user);
     }
 
     return user;
