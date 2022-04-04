@@ -1,16 +1,16 @@
-import { inject, injectable } from 'tsyringe';
-import IQueueProvider from '@shared/container/providers/QueueProvider/models/IQueueProvider';
+import 'reflect-metadata';
+import 'dotenv/config';
 
-@injectable()
-class Queue {
-  constructor(
-    @inject('QueueProvider')
-    private queueProvider: IQueueProvider,
-  ) {}
+import '@shared/container';
 
-  public async process(): Promise<void> {
-    await this.queueProvider.process();
-  }
+import queueConfig from '@config/queue';
+
+const QueueInstance = queueConfig.config.bull.instance;
+
+function startQueue() {
+  setTimeout(async () => {
+    await new QueueInstance().process();
+  }, 3000);
 }
 
-export default Queue;
+startQueue();

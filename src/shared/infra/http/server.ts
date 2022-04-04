@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { container } from 'tsyringe';
 import express, { Request, Response, NextFunction } from 'express';
 
 import 'express-async-errors';
@@ -13,7 +12,6 @@ import FieldError from '@shared/errors/FieldError';
 
 import uploadConfig from '@config/upload';
 
-import Queue from './queue';
 import routes from './routes';
 
 const server = express();
@@ -49,6 +47,4 @@ server.use((err: Error, _: Request, res: Response, __: NextFunction) => {
 
 server.listen(3333, async () => {
   console.log('Server is running on port 3333');
-
-  await container.resolve(Queue).process();
 });

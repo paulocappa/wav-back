@@ -25,6 +25,7 @@ usersRouter.put('/email', emailController.update);
 usersRouter.use(ensureIsAuthenticated);
 usersRouter.use(ensureEmailIsVerified);
 
+usersRouter.get('/', usersController.index);
 usersRouter.put('/', usersController.update);
 usersRouter.patch('/avatar', upload.single('avatar'), avatarController.update);
 

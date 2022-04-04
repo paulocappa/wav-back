@@ -16,6 +16,7 @@ class RecoverPassMailJob {
   public readonly options: JobsOptions = {
     attempts: 3,
     removeOnComplete: true,
+    removeOnFail: true,
   };
 
   constructor(

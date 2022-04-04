@@ -4,9 +4,23 @@ import { instanceToPlain } from 'class-transformer';
 
 import CreateUserService from '@modules/users/services/CreateUserService';
 import UpdateProfileService from '@modules/users/services/UpdateProfileService';
+import GetUserInfoService from '@modules/users/services/GetUserInfoService';
+
 import UsersValidation from '../validations/UsersValidation';
 
 class UsersController {
+  public async index(req: Request, res: Response): Promise<Response> {
+    const { user_id } = req;
+
+    const getUserInfoService = container.resolve(GetUserInfoService);
+
+    const user = await getUserInfoService.execute({ user_id });
+
+    console.log(typeof user);
+
+    return res.json(instanceToPlain(user));
+  }
+
   public async create(req: Request, res: Response): Promise<Response> {
     await new UsersValidation().create(req.body);
 
