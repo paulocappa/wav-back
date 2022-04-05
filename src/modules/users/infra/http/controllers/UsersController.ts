@@ -16,8 +16,6 @@ class UsersController {
 
     const user = await getUserInfoService.execute({ user_id });
 
-    console.log(typeof user);
-
     return res.json(instanceToPlain(user));
   }
 

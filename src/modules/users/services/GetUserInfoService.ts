@@ -20,13 +20,19 @@ class GetUserInfoService {
   ) {}
 
   public async execute({ user_id }: IRequest): Promise<User> {
-    let user = await this.cacheProvider.recover<User>(`user-info:${user_id}`);
+    const user = new User();
 
-    if (!user) {
-      user = await this.usersRepository.findById(user_id);
+    let userData = await this.cacheProvider.recover<User>(
+      `user-info:${user_id}`,
+    );
 
-      await this.cacheProvider.save<User>(`user-info:${user_id}`, user);
+    if (!userData) {
+      userData = await this.usersRepository.findById(user_id);
+
+      await this.cacheProvider.save<User>(`user-info:${user_id}`, userData);
     }
+
+    Object.assign(user, userData);
 
     return user;
   }
