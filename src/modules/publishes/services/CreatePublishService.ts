@@ -3,6 +3,7 @@ import { inject, injectable } from 'tsyringe';
 import Publish from '@modules/publishes/infra/typeorm/schemas/Publish';
 import IPublishesRepository from '@modules/publishes/repositories/IPublishesRepository';
 import IStorageProvider from '@shared/container/providers/StorageProvider/models/IStorageProvider';
+import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 
 import { IReceivers } from '../dtos/ICreatePublishDTO';
 
@@ -21,6 +22,9 @@ class CreatePublishService {
     @inject('PublishesRepository')
     private publishesRepository: IPublishesRepository,
 
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository,
+
     @inject('StorageProvider')
     private storageProvider: IStorageProvider,
   ) {}
@@ -33,6 +37,8 @@ class CreatePublishService {
     text,
     publishFilename,
   }: IRequest): Promise<Publish> {
+    const user = await this.usersRepository.findById(user_id);
+
     const filename = await this.storageProvider.saveFile(publishFilename);
 
     const publish = await this.publishesRepository.create({

@@ -12,12 +12,9 @@ import { ObjectId } from 'bson';
 
 import uploadConfig from '@config/upload';
 
-interface IReceivers {
+interface IReceiversSeen {
   user_id: ObjectId;
-  to_world: boolean;
-}
-
-interface IReceiversSeen extends IReceivers {
+  from_world: boolean;
   reaction: string | null;
   created_at: Date;
 }
@@ -39,13 +36,22 @@ export default class Publish {
   id: ObjectId;
 
   @Column()
+  @Transform(({ value }) => String(value))
   user_id: ObjectId;
 
-  @Column('array')
-  @Transform(({ value }) =>
-    value.map((v: IReceivers) => ({ ...v, user_id: String(v.user_id) })),
-  )
-  receivers: IReceivers[];
+  // @Column('array')
+  // @Transform(({ value }) =>
+  //   value.map((v: IReceivers) => ({ ...v, user_id: String(v.user_id) })),
+  // )
+  // receivers: IReceivers[];
+
+  @Column()
+  @Transform(({ value }) => value.map((id: ObjectId) => String(id)))
+  direct_receivers: ObjectId[] = [];
+
+  @Column()
+  @Transform(({ value }) => value.map((id: ObjectId) => String(id)))
+  followers_receivers: ObjectId[] = [];
 
   @Column()
   @Transform(({ value }) =>
@@ -53,11 +59,14 @@ export default class Publish {
   )
   receivers_seen: IReceiversSeen[] = [];
 
-  @Column('array')
-  @Transform(({ value }) => value.map((v: ObjectId) => String(v)))
+  @Column()
+  @Transform(({ value }) => value.map((id: ObjectId) => String(id)))
   reports: ObjectId[] = [];
 
-  @Column({ nullable: true })
+  @Column()
+  range: number;
+
+  @Column()
   text: string = null;
 
   @Column()
@@ -71,6 +80,15 @@ export default class Publish {
 
   @Column('geometry', { nullable: true })
   location: IGeometry = null;
+
+  @Column()
+  count_seen = 0;
+
+  @Column()
+  count_reactions = 0;
+
+  @Column()
+  count_reports = 0;
 
   @CreateDateColumn()
   created_at: Date;
