@@ -12,6 +12,10 @@ class UsersRepository implements IUsersRepository {
     this.ormRepository = getMongoRepository(User);
   }
 
+  get userOrmRepository(): MongoRepository<User> {
+    return this.ormRepository;
+  }
+
   public async create({
     email,
     username,

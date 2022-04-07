@@ -13,8 +13,9 @@ import { Exclude, Expose, Transform } from 'class-transformer';
 import { ObjectId } from 'bson';
 
 import generateRandomNumber from '@shared/utils/generateRandomNumber';
+import formatNumber from '@shared/utils/formatNumber';
 
-export type USER_BADGES = 'VERIFIED' | 'STREAMER' | 'YOUTUBER' | 'INFLUENCER';
+export type UserBadges = 'VERIFIED' | 'STREAMER' | 'YOUTUBER' | 'INFLUENCER';
 
 interface IBanInfo {
   banned: boolean;
@@ -29,6 +30,12 @@ interface IPushSettings {
   direct: boolean;
   new_follower: boolean;
 }
+
+export const UserExposeFieldsName = [
+  { reference: 'avatar', field: 'avatar_url' },
+  { reference: 'count_followers', field: 'formatted_count_followers' },
+  { reference: 'count_following', field: 'formatted_count_following' },
+] as const;
 @Entity('users')
 export default class User {
   @ObjectIdColumn()
@@ -42,7 +49,7 @@ export default class User {
   email: string;
 
   @Column()
-  @Transform(({ value }) => `@${value}`)
+  @Transform(({ value }) => `@${value}`, { toPlainOnly: true })
   username: string;
 
   @Column()
@@ -85,7 +92,7 @@ export default class User {
   language = 'pt';
 
   @Column('array')
-  badges: USER_BADGES[] = [];
+  badges: UserBadges[] = [];
 
   @Column('json')
   ban_info: IBanInfo = { banned: false, until: null, reason: null };
@@ -126,5 +133,19 @@ export default class User {
       default:
         return null;
     }
+  }
+
+  @Expose({ name: 'formatted_count_followers' })
+  get formatted_followers(): string | null {
+    if (!this.count_followers) return null;
+
+    return formatNumber(this.count_followers);
+  }
+
+  @Expose({ name: 'formatted_count_following' })
+  get formatted_following(): string | null {
+    if (!this.count_following) return null;
+
+    return formatNumber(this.count_following);
   }
 }

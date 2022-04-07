@@ -6,6 +6,7 @@ import Follower from '@modules/followers/infra/typeorm/schemas/Follower';
 import IFollowersRepository, {
   IFollowData,
   IIsFollowingData,
+  IListData,
   IUnfollowData,
 } from '@modules/followers/repositories/IFollowersRepository';
 
@@ -52,18 +53,28 @@ class FollowersRepository implements IFollowersRepository {
     return userIsFollowing;
   }
 
-  public async getFollowers(user_id: string): Promise<Follower[]> {
+  public async getFollowers({
+    user_id,
+    page,
+    per_page,
+  }: IListData): Promise<Follower[]> {
     const followers = await this.ormRepository
-      .aggregate([
+      .aggregate<Follower>([
         {
           $match: {
             following: new ObjectId(user_id),
           },
         },
         {
+          $skip: (page - 1) * per_page,
+        },
+        {
+          $limit: per_page,
+        },
+        {
           $lookup: {
             from: 'users',
-            as: 'user',
+            as: 'user_follower',
             let: { user_id: '$user_id' },
             pipeline: [
               {
@@ -75,12 +86,24 @@ class FollowersRepository implements IFollowersRepository {
               },
               {
                 $project: {
-                  _id: 1,
+                  _id: 0,
+                  id: '$_id',
                   name: 1,
                   username: 1,
+                  avatar: 1,
                 },
               },
             ],
+          },
+        },
+        {
+          $unwind: '$user_follower',
+        },
+        {
+          $project: {
+            _id: 0,
+            id: '$_id',
+            user_follower: 1,
           },
         },
       ])
@@ -89,18 +112,28 @@ class FollowersRepository implements IFollowersRepository {
     return followers;
   }
 
-  public async getFollowing(user_id: string): Promise<Follower[]> {
+  public async getFollowing({
+    user_id,
+    page,
+    per_page,
+  }: IListData): Promise<Follower[]> {
     const following = await this.ormRepository
-      .aggregate([
+      .aggregate<Follower>([
         {
           $match: {
             user_id: new ObjectId(user_id),
           },
         },
         {
+          $skip: (page - 1) * per_page,
+        },
+        {
+          $limit: per_page,
+        },
+        {
           $lookup: {
             from: 'users',
-            as: 'user',
+            as: 'user_following',
             let: { user_id: '$following' },
             pipeline: [
               {
@@ -112,12 +145,26 @@ class FollowersRepository implements IFollowersRepository {
               },
               {
                 $project: {
-                  _id: 1,
+                  _id: 0,
+                  id: '$_id',
                   name: 1,
                   username: 1,
+                  avatar: 1,
+                  count_followers: 1,
+                  count_following: 1,
                 },
               },
             ],
+          },
+        },
+        {
+          $unwind: '$user_following',
+        },
+        {
+          $project: {
+            _id: 0,
+            id: '$_id',
+            user_following: 1,
           },
         },
       ])

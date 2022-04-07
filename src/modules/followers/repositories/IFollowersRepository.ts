@@ -4,6 +4,13 @@ interface IData {
   user_id: string;
 }
 
+interface IPageData {
+  page: number;
+  per_page: number;
+}
+
+export type IListData = IData & IPageData;
+
 export interface IFollowData extends IData {
   user_to_follow_id: string;
 }
@@ -17,12 +24,9 @@ export interface IIsFollowingData extends IData {
 }
 
 export default interface IFollowersRepository {
-  follow({ user_id, user_to_follow_id }: IFollowData): Promise<Follower>;
-  unfollow({ user_id, user_to_unfollow_id }: IUnfollowData): Promise<void>;
-  isFollowing({
-    user_id,
-    following_user_id,
-  }: IIsFollowingData): Promise<Follower>;
-  getFollowers(user_id: string): Promise<Follower[]>;
-  getFollowing(user_id: string): Promise<Follower[]>;
+  follow(data: IFollowData): Promise<Follower>;
+  unfollow(data: IUnfollowData): Promise<void>;
+  isFollowing(data: IIsFollowingData): Promise<Follower>;
+  getFollowers(data: IListData): Promise<Follower[]>;
+  getFollowing(data: IListData): Promise<Follower[]>;
 }
