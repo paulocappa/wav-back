@@ -17,6 +17,10 @@ class FollowersRepository implements IFollowersRepository {
     this.ormRepository = getMongoRepository(Follower);
   }
 
+  get followersOrmRepository(): MongoRepository<Follower> {
+    return this.ormRepository;
+  }
+
   public async follow({
     user_id,
     user_to_follow_id,
@@ -171,6 +175,34 @@ class FollowersRepository implements IFollowersRepository {
       .toArray();
 
     return following;
+  }
+
+  public async removeAllFollowers(user_id: string): Promise<number> {
+    const user = new ObjectId(user_id);
+
+    const countDeleted = await this.ormRepository.count({
+      following: user,
+    });
+
+    await this.ormRepository.deleteMany({
+      following: user,
+    });
+
+    return countDeleted;
+  }
+
+  public async removeAllFollowing(user_id: string): Promise<number> {
+    const user = new ObjectId(user_id);
+
+    const countDeleted = await this.ormRepository.count({
+      user_id: user,
+    });
+
+    await this.ormRepository.deleteMany({
+      user_id: user,
+    });
+
+    return countDeleted;
   }
 }
 

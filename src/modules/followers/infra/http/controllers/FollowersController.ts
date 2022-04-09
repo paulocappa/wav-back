@@ -5,11 +5,6 @@ import { instanceToPlain, plainToInstance } from 'class-transformer';
 
 import AppError from '@shared/errors/AppError';
 
-import IncrementFollowersCountService from '@modules/users/services/IncrementFollowersCountService';
-import IncrementFollowingCountService from '@modules/users/services/IncrementFollowingCountService';
-import DecrementFollowersCountService from '@modules/users/services/DecrementFollowersCountService';
-import DecrementFollowingCountService from '@modules/users/services/DecrementFollowingCountService';
-
 import Follower from '@modules/followers/infra/typeorm/schemas/Follower';
 import FollowUserService from '@modules/followers/services/FollowUserService';
 import UnfollowUserService from '@modules/followers/services/UnfollowUserService';
@@ -50,20 +45,11 @@ class FollowersController {
     const { user_follow } = req.body;
 
     const followUserService = container.resolve(FollowUserService);
-    const incrementFollowersCountService = container.resolve(
-      IncrementFollowersCountService,
-    );
-    const incrementFollowingCountService = container.resolve(
-      IncrementFollowingCountService,
-    );
 
     const follow = await followUserService.execute({
       user_id: req.user_id,
       user_follow,
     });
-
-    await incrementFollowersCountService.execute(user_follow);
-    await incrementFollowingCountService.execute(req.user_id);
 
     return res.json(instanceToPlain(follow));
   }
@@ -75,20 +61,11 @@ class FollowersController {
     const user_follow = req.params.id;
 
     const unfollowUserService = container.resolve(UnfollowUserService);
-    const decrementFollowersCountService = container.resolve(
-      DecrementFollowersCountService,
-    );
-    const decrementFollowingCountService = container.resolve(
-      DecrementFollowingCountService,
-    );
 
     await unfollowUserService.execute({
       user_id,
       user_follow,
     });
-
-    await decrementFollowersCountService.execute(user_follow);
-    await decrementFollowingCountService.execute(user_id);
 
     return res.status(204).json();
   }

@@ -4,6 +4,7 @@ import AppError from '@shared/errors/AppError';
 
 import IFollowersRepository from '@modules/followers/repositories/IFollowersRepository';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
 
 interface IRequest {
   user_id: string;
@@ -18,6 +19,9 @@ class UnfollowUserService {
 
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
+
+    @inject('CacheProvider')
+    private cacheProvider: ICacheProvider,
   ) {}
 
   public async execute({ user_id, user_follow }: IRequest): Promise<void> {
@@ -27,10 +31,30 @@ class UnfollowUserService {
       throw new AppError('Provided user does not exists');
     }
 
+    const isFollowing = await this.followersRepository.isFollowing({
+      user_id,
+      following_user_id: user_follow,
+    });
+
+    if (!isFollowing) {
+      throw new AppError('You are not following this user!');
+    }
+
     await this.followersRepository.unfollow({
       user_id,
       user_to_unfollow_id: user_follow,
     });
+
+    await this.usersRepository.decrementFollowersCount({
+      user_id: user_follow,
+    });
+
+    await this.usersRepository.decrementFollowingCount({
+      user_id,
+    });
+
+    await this.cacheProvider.invalidate(`user-info:${user_follow}`);
+    await this.cacheProvider.invalidate(`user-info:${user_id}`);
   }
 }
 

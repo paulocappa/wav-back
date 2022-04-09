@@ -1,3 +1,4 @@
+import { MongoRepository } from 'typeorm';
 import Follower from '../infra/typeorm/schemas/Follower';
 
 interface IData {
@@ -24,9 +25,12 @@ export interface IIsFollowingData extends IData {
 }
 
 export default interface IFollowersRepository {
+  get followersOrmRepository(): MongoRepository<Follower>;
   follow(data: IFollowData): Promise<Follower>;
   unfollow(data: IUnfollowData): Promise<void>;
   isFollowing(data: IIsFollowingData): Promise<Follower>;
   getFollowers(data: IListData): Promise<Follower[]>;
   getFollowing(data: IListData): Promise<Follower[]>;
+  removeAllFollowers(user_id: string): Promise<number>;
+  removeAllFollowing(user_id: string): Promise<number>;
 }

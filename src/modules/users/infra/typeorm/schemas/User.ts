@@ -7,10 +7,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import uploadConfig from '@config/upload';
-
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { ObjectId } from 'bson';
+
+import uploadConfig from '@config/upload';
 
 import generateRandomNumber from '@shared/utils/generateRandomNumber';
 import formatNumber from '@shared/utils/formatNumber';
@@ -156,14 +156,14 @@ export default class User {
 
   @Expose({ name: 'formatted_count_followers' })
   get formatted_followers(): string | null {
-    if (!this.count_followers) return null;
+    if (this.count_followers !== 0 && !this.count_followers) return null;
 
     return formatNumber(this.count_followers);
   }
 
   @Expose({ name: 'formatted_count_following' })
   get formatted_following(): string | null {
-    if (!this.count_following) return null;
+    if (this.count_following !== 0 && !this.count_following) return null;
 
     return formatNumber(this.count_following);
   }

@@ -6,6 +6,7 @@ import Follower from '@modules/followers/infra/typeorm/schemas/Follower';
 
 import IFollowersRepository from '@modules/followers/repositories/IFollowersRepository';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
 
 interface IRequest {
   user_id: string;
@@ -20,6 +21,9 @@ class FollowUserService {
 
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
+
+    @inject('CacheProvider')
+    private cacheProvider: ICacheProvider,
   ) {}
 
   public async execute({ user_id, user_follow }: IRequest): Promise<Follower> {
@@ -42,6 +46,17 @@ class FollowUserService {
       user_id,
       user_to_follow_id: user_follow,
     });
+
+    await this.usersRepository.incrementFollowersCount({
+      user_id: user_follow,
+    });
+
+    await this.usersRepository.incrementFollowingCount({
+      user_id,
+    });
+
+    await this.cacheProvider.invalidate(`user-info:${user_follow}`);
+    await this.cacheProvider.invalidate(`user-info:${user_id}`);
 
     return follower;
   }
