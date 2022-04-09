@@ -5,7 +5,7 @@ import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICa
 import IUsersRepository from '../repositories/IUsersRepository';
 
 @injectable()
-class IncrementFollowingCountService {
+class DecrementFollowingCountService {
   constructor(
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
@@ -23,7 +23,7 @@ class IncrementFollowingCountService {
       },
       {
         $inc: {
-          count_following: 1,
+          count_following: -1,
         },
       },
     );
@@ -32,4 +32,4 @@ class IncrementFollowingCountService {
   }
 }
 
-export default IncrementFollowingCountService;
+export default DecrementFollowingCountService;

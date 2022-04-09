@@ -56,68 +56,87 @@ export default class User {
   @Exclude()
   password: string;
 
-  @Column('string', { nullable: true })
-  avatar: string = null;
+  @Column({ nullable: true })
+  avatar: string;
 
-  @Column('number')
-  count_publishes = 0;
+  @Column()
+  count_publishes: number;
 
-  @Column('number')
-  count_reactions = 0;
+  @Column()
+  count_reactions: number;
 
-  @Column('number')
-  count_followers = 0;
+  @Column()
+  count_followers: number;
 
-  @Column('number')
-  count_following = 0;
+  @Column()
+  count_following: number;
 
-  @Column('number')
-  coins = 0;
+  @Column()
+  coins: number;
 
-  @Column('number')
-  range = 50;
+  @Column()
+  range: number;
 
   @Column()
   @Exclude()
-  code: number = generateRandomNumber();
+  code: number;
 
-  @Column('boolean')
-  email_verified = false;
+  @Column()
+  email_verified: boolean;
 
   @Exclude()
-  @Column('boolean')
-  administrator = false;
+  @Column()
+  administrator: boolean;
 
-  @Column('string')
-  language = 'pt';
+  @Column()
+  language: string;
 
-  @Column('array')
-  badges: UserBadges[] = [];
+  @Column()
+  badges: UserBadges[];
 
-  @Column('json')
-  ban_info: IBanInfo = { banned: false, until: null, reason: null };
+  @Column()
+  ban_info: IBanInfo;
 
-  @Column('json')
-  push_settings: IPushSettings = {
-    world: true,
-    follower: true,
-    direct: true,
-    reactions: true,
-    new_follower: true,
-  };
+  @Column()
+  push_settings: IPushSettings;
 
-  @Column('array')
+  @Column()
   @Transform(({ value }) => value.map((v: ObjectId) => String(v)))
-  blocked_users: ObjectId[] = [];
+  blocked_users: ObjectId[];
 
   @Column('datetime')
-  last_action: Date = new Date();
+  last_action: Date;
 
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  constructor() {
+    this.avatar = null;
+    this.count_publishes = 0;
+    this.count_reactions = 0;
+    this.count_followers = 0;
+    this.count_following = 0;
+    this.coins = 0;
+    this.range = 50;
+    this.code = generateRandomNumber();
+    this.email_verified = false;
+    this.administrator = false;
+    this.language = 'pt';
+    this.badges = [];
+    this.ban_info = { banned: false, until: null, reason: null };
+    this.push_settings = {
+      world: true,
+      follower: true,
+      direct: true,
+      reactions: true,
+      new_follower: true,
+    };
+    this.blocked_users = [];
+    this.last_action = new Date();
+  }
 
   @Expose({ name: 'avatar_url' })
   get avatar_url(): string | null {

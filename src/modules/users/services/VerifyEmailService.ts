@@ -26,7 +26,7 @@ class VerifyEmailService {
       throw new AppError('User not found');
     }
 
-    if (user.code !== code) {
+    if (user.code !== Number(code)) {
       throw new AppError('Code does not match');
     }
 

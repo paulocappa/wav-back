@@ -7,12 +7,16 @@ import AppError from '@shared/errors/AppError';
 
 import IncrementFollowersCountService from '@modules/users/services/IncrementFollowersCountService';
 import IncrementFollowingCountService from '@modules/users/services/IncrementFollowingCountService';
+import DecrementFollowersCountService from '@modules/users/services/DecrementFollowersCountService';
+import DecrementFollowingCountService from '@modules/users/services/DecrementFollowingCountService';
 
 import Follower from '@modules/followers/infra/typeorm/schemas/Follower';
 import FollowUserService from '@modules/followers/services/FollowUserService';
 import UnfollowUserService from '@modules/followers/services/UnfollowUserService';
 import ListFollowersUserService from '@modules/followers/services/ListFollowersUserService';
 import ListFollowingUserService from '@modules/followers/services/ListFollowingUserService';
+
+import FollowersValidation from '../validations/FollowersValidation';
 
 class FollowersController {
   public async index(req: Request, res: Response): Promise<Response> {
@@ -41,6 +45,8 @@ class FollowersController {
   }
 
   public async create(req: Request, res: Response): Promise<Response> {
+    await new FollowersValidation().create(req.body);
+
     const { user_follow } = req.body;
 
     const followUserService = container.resolve(FollowUserService);
@@ -63,12 +69,26 @@ class FollowersController {
   }
 
   public async delete(req: Request, res: Response): Promise<Response> {
+    await new FollowersValidation().delete(req.params);
+
+    const { user_id } = req;
+    const user_follow = req.params.id;
+
     const unfollowUserService = container.resolve(UnfollowUserService);
+    const decrementFollowersCountService = container.resolve(
+      DecrementFollowersCountService,
+    );
+    const decrementFollowingCountService = container.resolve(
+      DecrementFollowingCountService,
+    );
 
     await unfollowUserService.execute({
-      user_id: req.user_id,
-      user_follow: req.params.id,
+      user_id,
+      user_follow,
     });
+
+    await decrementFollowersCountService.execute(user_follow);
+    await decrementFollowingCountService.execute(user_id);
 
     return res.status(204).json();
   }
