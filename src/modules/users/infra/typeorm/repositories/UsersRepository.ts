@@ -5,6 +5,7 @@ import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import IDeAndIncrementCountUserDTO from '@modules/users/dtos/IDeAndIncrementCountUserDTO';
 
+import IUpdateUserLastAction from '@modules/users/dtos/IUpdateUserLastAction';
 import User from '../schemas/User';
 
 class UsersRepository implements IUsersRepository {
@@ -123,6 +124,25 @@ class UsersRepository implements IUsersRepository {
       {
         $inc: {
           count_following: -count,
+        },
+      },
+    );
+  }
+
+  public async updateUserLastAction({
+    user_id,
+    coordinates,
+  }: IUpdateUserLastAction): Promise<void> {
+    await this.ormRepository.updateOne(
+      {
+        _id: new ObjectId(user_id),
+      },
+      {
+        $set: {
+          location: {
+            type: 'Point',
+            coordinates,
+          },
         },
       },
     );

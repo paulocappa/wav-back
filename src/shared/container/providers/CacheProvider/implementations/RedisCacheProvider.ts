@@ -3,6 +3,7 @@ import Redis, { Redis as RedisClient } from 'ioredis';
 import cacheConfig from '@config/cache';
 
 import ICacheProvider from '../models/ICacheProvider';
+import IRecoverFromList from '../dtos/IRecoverFromList';
 
 class RedisCacheProvider implements ICacheProvider {
   private client: RedisClient;
@@ -37,6 +38,36 @@ class RedisCacheProvider implements ICacheProvider {
     });
 
     await pipeline.exec();
+  }
+
+  public async invalidateMany(keys: string[]): Promise<void> {
+    const pipeline = this.client.pipeline();
+
+    keys.forEach(async key => {
+      pipeline.del(key);
+    });
+
+    await pipeline.exec();
+  }
+
+  public async pushToList<T>(key: string, value: T[]): Promise<void> {
+    const parsedValue = value.map(v => JSON.stringify(v));
+
+    this.client.lpush(key, ...parsedValue);
+  }
+
+  public async recoverFromList<T>({
+    key,
+    fromIndex = 0,
+    total = 10,
+  }: IRecoverFromList): Promise<T[] | null> {
+    const data = await this.client.lrange(key, fromIndex, total);
+
+    if (!data || !data.length) return null;
+
+    const parsedData = data.map(v => JSON.parse(v)) as T[];
+
+    return parsedData;
   }
 }
 

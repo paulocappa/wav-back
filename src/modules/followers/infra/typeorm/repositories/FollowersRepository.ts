@@ -95,6 +95,8 @@ class FollowersRepository implements IFollowersRepository {
                   name: 1,
                   username: 1,
                   avatar: 1,
+                  count_followers: 1,
+                  count_following: 1,
                 },
               },
             ],

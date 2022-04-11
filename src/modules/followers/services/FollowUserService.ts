@@ -55,8 +55,15 @@ class FollowUserService {
       user_id,
     });
 
-    await this.cacheProvider.invalidate(`user-info:${user_follow}`);
-    await this.cacheProvider.invalidate(`user-info:${user_id}`);
+    await this.cacheProvider.invalidateMany([
+      `user-info:${user_id}`,
+      `user-following:${user_id}`,
+      `user-info:${user_follow}`,
+      `user-followers:${user_follow}`,
+    ]);
+
+    await this.cacheProvider.invalidatePrefix(`user-followers:${user_follow}`);
+    await this.cacheProvider.invalidatePrefix(`user-following:${user_id}`);
 
     return follower;
   }
