@@ -1,13 +1,15 @@
-export interface IReceivers {
-  to_world: boolean;
-  user_id: string;
-}
+import type { IWaveSeen } from '../infra/typeorm/schemas/Publish';
 
 export default interface ICreatePublishDTO {
   user_id: string;
   text: string | null;
   watermark: boolean;
-  receivers: IReceivers[];
-  coordinates: number[];
+  followers_receivers: IWaveSeen[];
+  direct_receivers: IWaveSeen[];
+  range: number;
+  location: {
+    latitude: number;
+    longitude: number;
+  } | null;
   file: string;
 }

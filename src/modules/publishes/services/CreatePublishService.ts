@@ -1,19 +1,22 @@
+import { ObjectId } from 'bson';
 import { inject, injectable } from 'tsyringe';
 
 import Publish from '@modules/publishes/infra/typeorm/schemas/Publish';
 import IPublishesRepository from '@modules/publishes/repositories/IPublishesRepository';
 import IStorageProvider from '@shared/container/providers/StorageProvider/models/IStorageProvider';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
-
-import { IReceivers } from '../dtos/ICreatePublishDTO';
+import IFollowersRepository from '@modules/followers/repositories/IFollowersRepository';
 
 interface IRequest {
   user_id: string;
   watermark: boolean;
   text: string;
-  coordinates: number[];
+  location: {
+    latitude: number;
+    longitude: number;
+  } | null;
+  direct_users: string[];
   publishFilename: string;
-  receivers: IReceivers[];
 }
 
 @injectable()
@@ -25,29 +28,52 @@ class CreatePublishService {
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
 
+    @inject('FollowersRepository')
+    private followersRepository: IFollowersRepository,
+
     @inject('StorageProvider')
     private storageProvider: IStorageProvider,
   ) {}
 
   public async execute({
     user_id,
-    coordinates,
-    receivers,
+    location,
     watermark = false,
     text,
     publishFilename,
+    direct_users,
   }: IRequest): Promise<Publish> {
     const user = await this.usersRepository.findById(user_id);
 
+    const followers = await this.followersRepository.getAllFollowers(user_id);
+
     const filename = await this.storageProvider.saveFile(publishFilename);
+
+    const parsedFollowers = followers.map(follower => ({
+      user_id: new ObjectId(follower.user_id),
+      created_at: new Date(),
+      reaction: null,
+      seen: false,
+      seen_at: null,
+    }));
+
+    const parsedDirect = direct_users.map(userId => ({
+      user_id: new ObjectId(userId),
+      created_at: new Date(),
+      reaction: null,
+      seen: false,
+      seen_at: null,
+    }));
 
     const publish = await this.publishesRepository.create({
       user_id,
-      receivers,
+      followers_receivers: parsedFollowers,
+      direct_receivers: parsedDirect,
+      range: user.range,
       text,
       watermark,
       file: filename,
-      coordinates,
+      location,
     });
 
     return publish;

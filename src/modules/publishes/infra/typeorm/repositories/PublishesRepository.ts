@@ -1,8 +1,15 @@
-import ICreatePublishDTO from '@modules/publishes/dtos/ICreatePublishDTO';
-import IPublishesRepository from '@modules/publishes/repositories/IPublishesRepository';
 import { ObjectId } from 'bson';
 import { getMongoRepository, MongoRepository } from 'typeorm';
+
+import ICreatePublishDTO from '@modules/publishes/dtos/ICreatePublishDTO';
+import IPublishesRepository from '@modules/publishes/repositories/IPublishesRepository';
+
 import Publish from '../schemas/Publish';
+
+interface IGeometryPublish {
+  type: 'Point';
+  coordinates: [number, number];
+}
 
 class PublishesRepository implements IPublishesRepository {
   private ormRepository: MongoRepository<Publish>;
@@ -15,25 +22,25 @@ class PublishesRepository implements IPublishesRepository {
     user_id,
     text,
     watermark,
-    receivers,
-    coordinates,
+    followers_receivers,
+    direct_receivers,
+    location,
+    range,
     file,
   }: ICreatePublishDTO): Promise<Publish> {
-    const parsedReceivers = receivers.map(receiver => ({
-      ...receiver,
-      user_id: new ObjectId(receiver.user_id),
-    }));
+    const publishLocation = location
+      ? { type: 'Point', coordinates: [location.longitude, location.latitude] }
+      : null;
 
     const publish = this.ormRepository.create({
       user_id: new ObjectId(user_id),
-      receivers: parsedReceivers,
       text,
       watermark,
       file,
-      location: {
-        type: 'Point',
-        coordinates,
-      },
+      followers_receivers,
+      direct_receivers,
+      range,
+      location: publishLocation as IGeometryPublish | null,
     });
 
     await this.ormRepository.save(publish);

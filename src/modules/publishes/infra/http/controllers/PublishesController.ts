@@ -7,12 +7,7 @@ import CreatePublishService from '@modules/publishes/services/CreatePublishServi
 class PublishesController {
   public async create(req: Request, res: Response): Promise<Response> {
     const { user_id, file } = req;
-    const { text, watermark } = req.body;
-
-    const coordinates = [-46.4377097, -23.6532187];
-    const receivers = [
-      { user_id: '624c7928db61628ad0cad352', to_world: false },
-    ];
+    const { text, watermark, location, direct_users = [] } = req.body;
 
     const createPublishService = container.resolve(CreatePublishService);
 
@@ -21,8 +16,8 @@ class PublishesController {
       publishFilename: file.filename,
       text,
       watermark,
-      receivers,
-      coordinates,
+      direct_users,
+      location,
     });
 
     return res.json(instanceToPlain(publish));

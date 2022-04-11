@@ -57,6 +57,14 @@ class FollowersRepository implements IFollowersRepository {
     return userIsFollowing;
   }
 
+  public async getAllFollowers(user_id: string): Promise<Follower[]> {
+    const followers = await this.ormRepository.find({
+      following: new ObjectId(user_id),
+    });
+
+    return followers;
+  }
+
   public async getFollowers({
     user_id,
     page,

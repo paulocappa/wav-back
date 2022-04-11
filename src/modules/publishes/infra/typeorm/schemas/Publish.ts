@@ -12,11 +12,15 @@ import { ObjectId } from 'bson';
 
 import uploadConfig from '@config/upload';
 
-interface IReceiversSeen {
+interface ISeen {
   user_id: ObjectId;
-  from_world: boolean;
   reaction: string | null;
-  created_at: Date;
+  seen_at: Date | null;
+}
+
+export interface IWaveSeen extends ISeen {
+  seen: boolean;
+  created_at: Date | null;
 }
 
 interface IBanInfo {
@@ -26,7 +30,7 @@ interface IBanInfo {
 
 interface IGeometry {
   type: 'Point';
-  coordinates: number[];
+  coordinates: [number, number];
 }
 
 @Entity('publishes')
@@ -39,56 +43,54 @@ export default class Publish {
   @Transform(({ value }) => String(value))
   user_id: ObjectId;
 
-  // @Column('array')
-  // @Transform(({ value }) =>
-  //   value.map((v: IReceivers) => ({ ...v, user_id: String(v.user_id) })),
-  // )
-  // receivers: IReceivers[];
-
-  @Column()
-  @Transform(({ value }) => value.map((id: ObjectId) => String(id)))
-  direct_receivers: ObjectId[] = [];
-
-  @Column()
-  @Transform(({ value }) => value.map((id: ObjectId) => String(id)))
-  followers_receivers: ObjectId[] = [];
-
-  @Column()
+  @Column({ default: [] })
   @Transform(({ value }) =>
-    value.map((v: IReceiversSeen) => ({ ...v, user_id: String(v.user_id) })),
+    value.map((v: IWaveSeen) => ({ ...v, user_id: String(v.user_id) })),
   )
-  receivers_seen: IReceiversSeen[] = [];
+  direct_receivers: IWaveSeen[];
 
-  @Column()
+  @Column({ default: [] })
+  @Transform(({ value }) =>
+    value.map((v: IWaveSeen) => ({ ...v, user_id: String(v.user_id) })),
+  )
+  followers_receivers: IWaveSeen[];
+
+  @Column({ default: [] })
+  @Transform(({ value }) =>
+    value.map((v: ISeen) => ({ ...v, user_id: String(v.user_id) })),
+  )
+  receivers_seen: ISeen[];
+
+  @Column({ default: [] })
   @Transform(({ value }) => value.map((id: ObjectId) => String(id)))
-  reports: ObjectId[] = [];
+  reports: ObjectId[];
 
   @Column()
   range: number;
 
-  @Column()
-  text: string = null;
+  @Column({ nullable: true, default: null })
+  text: string;
 
   @Column()
   file: string;
 
-  @Column()
-  watermark = false;
+  @Column({ default: false })
+  watermark: boolean;
 
-  @Column('json')
-  ban_info: IBanInfo = { banned: false, reason: null };
+  @Column('json', { default: { banned: false, reason: null } })
+  ban_info: IBanInfo;
 
-  @Column('geometry', { nullable: true })
-  location: IGeometry = null;
+  @Column('geometry', { nullable: true, default: null })
+  location: IGeometry;
 
-  @Column()
-  count_seen = 0;
+  @Column({ default: 0 })
+  count_seen: number;
 
-  @Column()
-  count_reactions = 0;
+  @Column({ default: 0 })
+  count_reactions: number;
 
-  @Column()
-  count_reports = 0;
+  @Column({ default: 0 })
+  count_reports: number;
 
   @CreateDateColumn()
   created_at: Date;
@@ -98,6 +100,20 @@ export default class Publish {
 
   @DeleteDateColumn()
   deleted_at: Date;
+
+  constructor() {
+    this.direct_receivers = [];
+    this.followers_receivers = [];
+    this.receivers_seen = [];
+    this.reports = [];
+    this.text = null;
+    this.watermark = false;
+    this.ban_info = { banned: false, reason: null };
+    this.location = null;
+    this.count_seen = 0;
+    this.count_reactions = 0;
+    this.count_reports = 0;
+  }
 
   @Expose({ name: 'publish_url' })
   get publish_url(): string | null {
