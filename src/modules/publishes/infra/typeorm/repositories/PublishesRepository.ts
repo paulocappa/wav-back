@@ -6,11 +6,6 @@ import IPublishesRepository from '@modules/publishes/repositories/IPublishesRepo
 
 import Publish from '../schemas/Publish';
 
-interface IGeometryPublish {
-  type: 'Point';
-  coordinates: [number, number];
-}
-
 class PublishesRepository implements IPublishesRepository {
   private ormRepository: MongoRepository<Publish>;
 
@@ -29,10 +24,6 @@ class PublishesRepository implements IPublishesRepository {
     file,
     to_world,
   }: ICreatePublishDTO): Promise<Publish> {
-    const publishLocation = location
-      ? { type: 'Point', coordinates: [location.longitude, location.latitude] }
-      : null;
-
     const publish = this.ormRepository.create({
       user_id: new ObjectId(user_id),
       text,
@@ -41,7 +32,7 @@ class PublishesRepository implements IPublishesRepository {
       followers_receivers,
       direct_receivers,
       range,
-      location: publishLocation as IGeometryPublish | null,
+      location,
       to_world,
     });
 

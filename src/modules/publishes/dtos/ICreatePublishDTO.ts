@@ -8,8 +8,8 @@ export default interface ICreatePublishDTO {
   direct_receivers: IWaveSeen[];
   range: number;
   location: {
-    latitude: number;
-    longitude: number;
+    type: 'Point';
+    coordinates: [number, number];
   } | null;
   file: string;
   to_world: boolean;

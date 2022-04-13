@@ -5,16 +5,13 @@ import Publish from '@modules/publishes/infra/typeorm/schemas/Publish';
 import IPublishesRepository from '@modules/publishes/repositories/IPublishesRepository';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import IFollowersRepository from '@modules/followers/repositories/IFollowersRepository';
+
 import ICreatePublishDTO from '../dtos/ICreatePublishDTO';
 
 interface IRequest {
   user_id: string;
   watermark: boolean;
   text: string | null;
-  location: {
-    latitude: number;
-    longitude: number;
-  } | null;
   direct_users: string[];
   filename: string;
   to_world: boolean;
@@ -35,27 +32,26 @@ class CreatePublishService {
 
   public async execute({
     user_id,
-    location,
     watermark = false,
     text = null,
     filename,
     direct_users,
     to_world,
   }: IRequest): Promise<Publish> {
+    const user = await this.usersRepository.findById(user_id);
+
     let followersReceivers: ICreatePublishDTO['followers_receivers'] = [];
 
     const createPublishObject = {
       user_id,
       text,
       watermark,
-      location,
+      location: user.location,
       to_world,
       file: filename,
     } as ICreatePublishDTO;
 
     if (to_world) {
-      const user = await this.usersRepository.findById(user_id);
-
       const followers = await this.followersRepository.getAllFollowers(
         user_id,
         direct_users,

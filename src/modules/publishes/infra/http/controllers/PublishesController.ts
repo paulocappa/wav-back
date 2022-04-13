@@ -4,15 +4,17 @@ import { instanceToPlain } from 'class-transformer';
 
 import CreatePublishService from '@modules/publishes/services/CreatePublishService';
 import DeletePublishService from '@modules/publishes/services/DeletePublishService';
+import PublishesValidation from '../validations/PublishesValidation';
 
 class PublishesController {
   public async create(req: Request, res: Response): Promise<Response> {
+    await new PublishesValidation().create(req.body);
+
     const { user_id } = req;
 
     const {
       filename,
       text,
-      location,
       watermark = false,
       to_world = false,
       direct_users = [],
@@ -26,7 +28,6 @@ class PublishesController {
       text,
       watermark,
       direct_users,
-      location,
       to_world,
     });
 
@@ -34,6 +35,8 @@ class PublishesController {
   }
 
   public async delete(req: Request, res: Response): Promise<Response> {
+    await new PublishesValidation().delete(req.params);
+
     const { user_id } = req;
     const { publish_id } = req.params;
 
