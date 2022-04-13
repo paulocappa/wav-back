@@ -89,6 +89,11 @@ class CreatePublishService {
 
     const publish = await this.publishesRepository.create(createPublishObject);
 
+    await this.usersRepository.incrementFieldCount(user_id, {
+      field: 'count_publishes',
+      count: 1,
+    });
+
     return publish;
   }
 }

@@ -3,6 +3,7 @@ import { container } from 'tsyringe';
 import { instanceToPlain } from 'class-transformer';
 
 import CreatePublishService from '@modules/publishes/services/CreatePublishService';
+import DeletePublishService from '@modules/publishes/services/DeletePublishService';
 
 class PublishesController {
   public async create(req: Request, res: Response): Promise<Response> {
@@ -30,6 +31,17 @@ class PublishesController {
     });
 
     return res.json(instanceToPlain(publish));
+  }
+
+  public async delete(req: Request, res: Response): Promise<Response> {
+    const { user_id } = req;
+    const { publish_id } = req.params;
+
+    const deletePublishService = container.resolve(DeletePublishService);
+
+    await deletePublishService.execute({ user_id, publish_id });
+
+    return res.status(204).json();
   }
 }
 
