@@ -17,6 +17,11 @@ import formatNumber from '@shared/utils/formatNumber';
 
 export type UserBadges = 'VERIFIED' | 'STREAMER' | 'YOUTUBER' | 'INFLUENCER';
 
+interface IGeometry {
+  type: 'Point';
+  coordinates: [number, number];
+}
+
 interface IBanInfo {
   banned: boolean;
   until: Date | null;
@@ -100,6 +105,9 @@ export default class User {
   @Column()
   push_settings: IPushSettings;
 
+  @Column('geometry', { default: null })
+  location: IGeometry;
+
   @Column()
   @Transform(({ value }) => value.map((v: ObjectId) => String(v)))
   blocked_users: ObjectId[];
@@ -127,6 +135,7 @@ export default class User {
     this.language = 'pt';
     this.badges = [];
     this.ban_info = { banned: false, until: null, reason: null };
+    this.location = null;
     this.push_settings = {
       world: true,
       follower: true,
