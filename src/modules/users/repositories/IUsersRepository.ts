@@ -3,8 +3,9 @@ import { MongoRepository } from 'typeorm';
 import User from '../infra/typeorm/schemas/User';
 
 import ICreateUserDTO from '../dtos/ICreateUserDTO';
-import IDeAndIncrementCountUserDTO from '../dtos/IDeAndIncrementCountUserDTO';
 import IUpdateUserLastAction from '../dtos/IUpdateUserLastAction';
+import IIncrementCountUserField from '../dtos/IIncrementCountUserField';
+import IDecrementCountUserField from '../dtos/IDecrementCountUserField';
 
 export default interface IUsersRepository {
   get userOrmRepository(): MongoRepository<User>;
@@ -14,9 +15,13 @@ export default interface IUsersRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   findByUsername(username: string): Promise<User | null>;
-  incrementFollowersCount(data: IDeAndIncrementCountUserDTO): Promise<void>;
-  incrementFollowingCount(data: IDeAndIncrementCountUserDTO): Promise<void>;
-  decrementFollowersCount(data: IDeAndIncrementCountUserDTO): Promise<void>;
-  decrementFollowingCount(data: IDeAndIncrementCountUserDTO): Promise<void>;
+  incrementFieldCount(
+    user_id: string,
+    data: IIncrementCountUserField,
+  ): Promise<void>;
+  decrementFieldCount(
+    user_id: string,
+    data: IDecrementCountUserField,
+  ): Promise<void>;
   updateUserLastAction(data: IUpdateUserLastAction): Promise<void>;
 }

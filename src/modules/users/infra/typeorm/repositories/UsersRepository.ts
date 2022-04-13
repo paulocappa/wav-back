@@ -3,9 +3,10 @@ import { ObjectId } from 'bson';
 
 import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
-import IDeAndIncrementCountUserDTO from '@modules/users/dtos/IDeAndIncrementCountUserDTO';
 
 import IUpdateUserLastAction from '@modules/users/dtos/IUpdateUserLastAction';
+import IIncrementCountUserField from '@modules/users/dtos/IIncrementCountUserField';
+import IDecrementCountUserField from '@modules/users/dtos/IDecrementCountUserField';
 import User from '../schemas/User';
 
 class UsersRepository implements IUsersRepository {
@@ -65,65 +66,33 @@ class UsersRepository implements IUsersRepository {
     await this.ormRepository.deleteOne(new ObjectId(user_id));
   }
 
-  public async incrementFollowersCount({
-    user_id,
-    count = 1,
-  }: IDeAndIncrementCountUserDTO): Promise<void> {
+  public async incrementFieldCount(
+    user_id: string,
+    { field, count = 1 }: IIncrementCountUserField,
+  ): Promise<void> {
     await this.ormRepository.updateOne(
       {
         _id: new ObjectId(user_id),
       },
       {
         $inc: {
-          count_followers: count,
+          [field]: count,
         },
       },
     );
   }
 
-  public async incrementFollowingCount({
-    user_id,
-    count = 1,
-  }: IDeAndIncrementCountUserDTO): Promise<void> {
+  public async decrementFieldCount(
+    user_id: string,
+    { field, count = 1 }: IDecrementCountUserField,
+  ): Promise<void> {
     await this.ormRepository.updateOne(
       {
         _id: new ObjectId(user_id),
       },
       {
         $inc: {
-          count_following: count,
-        },
-      },
-    );
-  }
-
-  public async decrementFollowersCount({
-    user_id,
-    count = 1,
-  }: IDeAndIncrementCountUserDTO): Promise<void> {
-    await this.ormRepository.updateOne(
-      {
-        _id: new ObjectId(user_id),
-      },
-      {
-        $inc: {
-          count_followers: -count,
-        },
-      },
-    );
-  }
-
-  public async decrementFollowingCount({
-    user_id,
-    count = 1,
-  }: IDeAndIncrementCountUserDTO): Promise<void> {
-    await this.ormRepository.updateOne(
-      {
-        _id: new ObjectId(user_id),
-      },
-      {
-        $inc: {
-          count_following: -count,
+          [field]: -count,
         },
       },
     );

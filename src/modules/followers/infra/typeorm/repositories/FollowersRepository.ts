@@ -57,9 +57,19 @@ class FollowersRepository implements IFollowersRepository {
     return userIsFollowing;
   }
 
-  public async getAllFollowers(user_id: string): Promise<Follower[]> {
+  public async getAllFollowers(
+    user_id: string,
+    excludeIds?: string[],
+  ): Promise<Follower[]> {
+    const parsedExcludeIds = excludeIds.map(id => new ObjectId(id)) ?? [];
+
     const followers = await this.ormRepository.find({
-      following: new ObjectId(user_id),
+      where: {
+        user_id: {
+          $nin: parsedExcludeIds,
+        },
+        following: new ObjectId(user_id),
+      },
     });
 
     return followers;

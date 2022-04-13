@@ -6,18 +6,27 @@ import CreatePublishService from '@modules/publishes/services/CreatePublishServi
 
 class PublishesController {
   public async create(req: Request, res: Response): Promise<Response> {
-    const { user_id, file } = req;
-    const { text, watermark, location, direct_users = [] } = req.body;
+    const { user_id } = req;
+
+    const {
+      filename,
+      text,
+      location,
+      watermark = false,
+      to_world = false,
+      direct_users = [],
+    } = req.body;
 
     const createPublishService = container.resolve(CreatePublishService);
 
     const publish = await createPublishService.execute({
       user_id,
-      publishFilename: file.filename,
+      filename,
       text,
       watermark,
       direct_users,
       location,
+      to_world,
     });
 
     return res.json(instanceToPlain(publish));

@@ -65,7 +65,10 @@ export default class Publish {
   @Transform(({ value }) => value.map((id: ObjectId) => String(id)))
   reports: ObjectId[];
 
-  @Column()
+  @Column({ default: false })
+  to_world: boolean;
+
+  @Column({ nullable: true })
   range: number;
 
   @Column({ nullable: true, default: null })
@@ -113,6 +116,8 @@ export default class Publish {
     this.count_seen = 0;
     this.count_reactions = 0;
     this.count_reports = 0;
+    this.range = null;
+    this.to_world = false;
   }
 
   @Expose({ name: 'publish_url' })

@@ -12,4 +12,5 @@ export default interface ICreatePublishDTO {
     longitude: number;
   } | null;
   file: string;
+  to_world: boolean;
 }

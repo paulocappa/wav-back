@@ -31,7 +31,7 @@ export default interface IFollowersRepository {
   isFollowing(data: IIsFollowingData): Promise<Follower>;
   getFollowers(data: IListData): Promise<Follower[]>;
   getFollowing(data: IListData): Promise<Follower[]>;
-  getAllFollowers(user_id: string): Promise<Follower[]>;
+  getAllFollowers(user_id: string, excludeIds?: string[]): Promise<Follower[]>;
   removeAllFollowers(user_id: string): Promise<number>;
   removeAllFollowing(user_id: string): Promise<number>;
 }

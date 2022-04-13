@@ -47,12 +47,14 @@ class FollowUserService {
       user_to_follow_id: user_follow,
     });
 
-    await this.usersRepository.incrementFollowersCount({
-      user_id: user_follow,
+    await this.usersRepository.incrementFieldCount(user_follow, {
+      field: 'count_followers',
+      count: 1,
     });
 
-    await this.usersRepository.incrementFollowingCount({
-      user_id,
+    await this.usersRepository.incrementFieldCount(user_id, {
+      field: 'count_following',
+      count: 1,
     });
 
     await this.cacheProvider.invalidateMany([

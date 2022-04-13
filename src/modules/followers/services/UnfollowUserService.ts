@@ -45,12 +45,14 @@ class UnfollowUserService {
       user_to_unfollow_id: user_follow,
     });
 
-    await this.usersRepository.decrementFollowersCount({
-      user_id: user_follow,
+    await this.usersRepository.decrementFieldCount(user_follow, {
+      field: 'count_followers',
+      count: 1,
     });
 
-    await this.usersRepository.decrementFollowingCount({
-      user_id,
+    await this.usersRepository.decrementFieldCount(user_id, {
+      field: 'count_following',
+      count: 1,
     });
 
     await this.cacheProvider.invalidateMany([

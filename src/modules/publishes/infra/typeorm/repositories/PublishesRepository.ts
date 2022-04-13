@@ -27,6 +27,7 @@ class PublishesRepository implements IPublishesRepository {
     location,
     range,
     file,
+    to_world,
   }: ICreatePublishDTO): Promise<Publish> {
     const publishLocation = location
       ? { type: 'Point', coordinates: [location.longitude, location.latitude] }
@@ -41,6 +42,7 @@ class PublishesRepository implements IPublishesRepository {
       direct_receivers,
       range,
       location: publishLocation as IGeometryPublish | null,
+      to_world,
     });
 
     await this.ormRepository.save(publish);
