@@ -1,7 +1,11 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UserExposeFieldsName } from '@modules/users/infra/typeorm/schemas/User';
+import { PublishExposeFieldsName } from '@modules/publishes/infra/typeorm/schemas/Publish';
 
-type ExposeFields = typeof UserExposeFieldsName;
+type ExposeFields =
+  | typeof UserExposeFieldsName
+  | typeof PublishExposeFieldsName;
 
 interface ITransformLookup {
   value: any;
@@ -16,12 +20,12 @@ export default function transformLookup({
   key,
   expose_fields,
 }: ITransformLookup) {
-  const data = obj[key];
+  const lookupObject = obj[key];
 
-  const dataKeys = Object.keys(data);
+  const dataKeys = Object.keys(lookupObject);
 
   expose_fields.forEach(({ field, reference }) => {
-    if (reference in data) {
+    if (reference in lookupObject) {
       dataKeys.push(field);
     }
   });

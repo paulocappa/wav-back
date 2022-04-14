@@ -9,6 +9,7 @@ import IFollowersRepository, {
   IListData,
   IUnfollowData,
 } from '@modules/followers/repositories/IFollowersRepository';
+import userProject from '@modules/users/infra/typeorm/mongoProjects/UserProject';
 
 class FollowersRepository implements IFollowersRepository {
   private ormRepository: MongoRepository<Follower>;
@@ -96,7 +97,7 @@ class FollowersRepository implements IFollowersRepository {
         {
           $lookup: {
             from: 'users',
-            as: 'user_follower',
+            as: 'user',
             let: { user_id: '$user_id' },
             pipeline: [
               {
@@ -107,27 +108,26 @@ class FollowersRepository implements IFollowersRepository {
                 },
               },
               {
-                $project: {
-                  _id: 0,
-                  id: '$_id',
-                  name: 1,
-                  username: 1,
-                  avatar: 1,
-                  count_followers: 1,
-                  count_following: 1,
-                },
+                $project: userProject([
+                  'name',
+                  'username',
+                  'avatar',
+                  'location',
+                  'count_followers',
+                  'count_following',
+                ]),
               },
             ],
           },
         },
         {
-          $unwind: '$user_follower',
+          $unwind: '$user',
         },
         {
           $project: {
             _id: 0,
             id: '$_id',
-            user_follower: 1,
+            user: 1,
           },
         },
       ])
@@ -157,7 +157,7 @@ class FollowersRepository implements IFollowersRepository {
         {
           $lookup: {
             from: 'users',
-            as: 'user_following',
+            as: 'user',
             let: { user_id: '$following' },
             pipeline: [
               {
@@ -168,27 +168,26 @@ class FollowersRepository implements IFollowersRepository {
                 },
               },
               {
-                $project: {
-                  _id: 0,
-                  id: '$_id',
-                  name: 1,
-                  username: 1,
-                  avatar: 1,
-                  count_followers: 1,
-                  count_following: 1,
-                },
+                $project: userProject([
+                  'name',
+                  'username',
+                  'avatar',
+                  'location',
+                  'count_followers',
+                  'count_following',
+                ]),
               },
             ],
           },
         },
         {
-          $unwind: '$user_following',
+          $unwind: '$user',
         },
         {
           $project: {
             _id: 0,
             id: '$_id',
-            user_following: 1,
+            user: 1,
           },
         },
       ])

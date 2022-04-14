@@ -1,4 +1,6 @@
-export default function formatNumber(number: number): string {
+export default function formatNumber(fieldNumber: number | string): string {
+  const number = Number(fieldNumber);
+
   const symbols = [
     { value: 1, symbol: '' },
     { value: 1e3, symbol: 'k' },

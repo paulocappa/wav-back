@@ -33,6 +33,10 @@ interface IGeometry {
   coordinates: [number, number];
 }
 
+export const PublishExposeFieldsName = [
+  { reference: 'file', field: 'publish_url' },
+] as const;
+
 @Entity('publishes')
 export default class Publish {
   @ObjectIdColumn()
@@ -121,7 +125,7 @@ export default class Publish {
   }
 
   @Expose({ name: 'publish_url' })
-  get publish_url(): string | null {
+  publish_url(): string | null {
     if (!this.file) return null;
 
     const { driver, config } = uploadConfig;

@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
 
 import { container } from 'tsyringe';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { instanceToPlain } from 'class-transformer';
 
 import AppError from '@shared/errors/AppError';
 
-import Follower from '@modules/followers/infra/typeorm/schemas/Follower';
 import FollowUserService from '@modules/followers/services/FollowUserService';
 import UnfollowUserService from '@modules/followers/services/UnfollowUserService';
 import ListFollowersUserService from '@modules/followers/services/ListFollowersUserService';
@@ -36,7 +35,7 @@ class FollowersController {
       per_page: per_page as string,
     });
 
-    return res.json(plainToInstance(Follower, list));
+    return res.json(list);
   }
 
   public async create(req: Request, res: Response): Promise<Response> {

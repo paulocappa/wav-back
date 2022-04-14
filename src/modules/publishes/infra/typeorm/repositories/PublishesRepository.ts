@@ -1,10 +1,18 @@
 import { ObjectId } from 'bson';
 import { getMongoRepository, MongoRepository } from 'typeorm';
+import { subMonths } from 'date-fns';
 
 import ICreatePublishDTO from '@modules/publishes/dtos/ICreatePublishDTO';
 import IPublishesRepository from '@modules/publishes/repositories/IPublishesRepository';
 
+import IListRecentPublishesDTO, {
+  ListType,
+} from '@modules/publishes/dtos/IListRecentPublishesDTO';
+
+import AppError from '@shared/errors/AppError';
+import userProject from '@modules/users/infra/typeorm/mongoProjects/UserProject';
 import Publish from '../schemas/Publish';
+import publishProject from '../mongoProjects/PublishProject';
 
 class PublishesRepository implements IPublishesRepository {
   private ormRepository: MongoRepository<Publish>;
@@ -49,6 +57,133 @@ class PublishesRepository implements IPublishesRepository {
 
   public async delete(publish_id: string): Promise<void> {
     await this.ormRepository.delete(publish_id);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private getListQuery(user_id: ObjectId, list_type: ListType): any {
+    switch (list_type) {
+      case 'world':
+        return {
+          to_world: {
+            $eq: true,
+          },
+          direct_receivers: {
+            $not: {
+              $elemMatch: {
+                user_id,
+              },
+            },
+          },
+          followers_receivers: {
+            $not: {
+              $elemMatch: {
+                user_id,
+              },
+            },
+          },
+        };
+      case 'follower':
+        return {
+          followers_receivers: {
+            $elemMatch: {
+              user_id,
+              seen: false,
+            },
+          },
+        };
+      case 'direct':
+        return {
+          direct_receivers: {
+            $elemMatch: {
+              user_id,
+              seen: false,
+            },
+          },
+        };
+      default:
+        throw new AppError('List query not found');
+    }
+  }
+
+  public async listRecentPublishes({
+    user_id,
+    list_type,
+    page,
+    per_page,
+  }: IListRecentPublishesDTO): Promise<Publish[]> {
+    const matchQuery = this.getListQuery(new ObjectId(user_id), list_type);
+
+    const oneMonthAgo = subMonths(new Date(), 1);
+
+    const publishes = await this.ormRepository
+      .aggregate([
+        {
+          $match: {
+            user_id: {
+              $ne: new ObjectId(user_id),
+            },
+            created_at: {
+              $gte: oneMonthAgo,
+            },
+            ...matchQuery,
+          },
+        },
+        {
+          $skip: (page - 1) * per_page,
+        },
+        {
+          $limit: per_page,
+        },
+        {
+          $lookup: {
+            from: 'users',
+            as: 'user',
+            let: {
+              user_id: '$user_id',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$_id', '$$user_id'],
+                  },
+                },
+              },
+              {
+                $project: userProject([
+                  'name',
+                  'range',
+                  'avatar',
+                  'username',
+                  'location',
+                  'count_followers',
+                  'count_following',
+                ]),
+              },
+            ],
+          },
+        },
+        {
+          $unwind: {
+            path: '$user',
+          },
+        },
+        {
+          $project: {
+            user: 1,
+            ...publishProject([
+              'user_id',
+              'file',
+              'watermark',
+              'text',
+              'location',
+            ]),
+          },
+        },
+      ])
+      .toArray();
+
+    return publishes;
   }
 }
 
