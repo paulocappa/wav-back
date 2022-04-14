@@ -75,6 +75,7 @@ export default function userProject(fields: FieldType) {
         break;
       case 'count_followers':
       case 'count_following':
+        project[field] = 1;
         project[`formatted_${field}`] = {
           $switch: {
             branches: [
