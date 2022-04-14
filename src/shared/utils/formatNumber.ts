@@ -18,11 +18,12 @@ export default function formatNumber(fieldNumber: number | string): string {
     }
   }
 
-  const toFixed = i <= 1 ? 2 : 1;
+  const divide = number / symbols[i].value;
+
+  const toFixed = divide > 100 ? 0 : 1;
 
   const formattedNumber =
-    (number / symbols[i].value).toFixed(toFixed).replace(rgx, '$1') +
-    symbols[i].symbol;
+    divide.toFixed(toFixed).replace(rgx, '$1') + symbols[i].symbol;
 
   return formattedNumber;
 }
