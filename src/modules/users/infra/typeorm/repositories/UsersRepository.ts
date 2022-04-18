@@ -7,6 +7,7 @@ import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import IUpdateUserLastAction from '@modules/users/dtos/IUpdateUserLastAction';
 import IIncrementCountUserField from '@modules/users/dtos/IIncrementCountUserField';
 import IDecrementCountUserField from '@modules/users/dtos/IDecrementCountUserField';
+import IIncrementManyUsersCountDTO from '@modules/users/dtos/IIncrementManyUsersCountDTO';
 import User from '../schemas/User';
 
 class UsersRepository implements IUsersRepository {
@@ -115,6 +116,31 @@ class UsersRepository implements IUsersRepository {
         },
       },
     );
+  }
+
+  public async incrementManyUsersCount(
+    data: IIncrementManyUsersCountDTO[],
+  ): Promise<void> {
+    const formattedData = data.map(el => {
+      const incFields: Record<string, number> = {};
+
+      el.fieldsToUpdate.forEach(({ field, count }) => {
+        incFields[field] = count;
+      });
+
+      return {
+        updateOne: {
+          filter: {
+            _id: new ObjectId(el.user_id),
+          },
+          update: {
+            $inc: incFields,
+          },
+        },
+      };
+    });
+
+    await this.ormRepository.bulkWrite(formattedData);
   }
 }
 

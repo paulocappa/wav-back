@@ -6,6 +6,7 @@ import ICreateUserDTO from '../dtos/ICreateUserDTO';
 import IUpdateUserLastAction from '../dtos/IUpdateUserLastAction';
 import IIncrementCountUserField from '../dtos/IIncrementCountUserField';
 import IDecrementCountUserField from '../dtos/IDecrementCountUserField';
+import IIncrementManyUsersCountDTO from '../dtos/IIncrementManyUsersCountDTO';
 
 export default interface IUsersRepository {
   get userOrmRepository(): MongoRepository<User>;
@@ -24,4 +25,5 @@ export default interface IUsersRepository {
     data: IDecrementCountUserField,
   ): Promise<void>;
   updateUserLastAction(data: IUpdateUserLastAction): Promise<void>;
+  incrementManyUsersCount(data: IIncrementManyUsersCountDTO[]): Promise<void>;
 }

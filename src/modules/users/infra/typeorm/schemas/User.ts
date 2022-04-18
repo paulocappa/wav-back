@@ -68,6 +68,9 @@ export default class User {
   count_publishes: number;
 
   @Column()
+  count_views: number;
+
+  @Column()
   count_reactions: number;
 
   @Column()
@@ -127,6 +130,7 @@ export default class User {
     this.count_reactions = 0;
     this.count_followers = 0;
     this.count_following = 0;
+    this.count_views = 0;
     this.coins = 0;
     this.range = 50;
     this.code = generateRandomNumber();

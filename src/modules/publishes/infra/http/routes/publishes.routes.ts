@@ -13,6 +13,7 @@ publishesRouter.use(ensureIsAuthenticated);
 publishesRouter.use(ensureEmailIsVerified);
 
 publishesRouter.post('/', publishesController.create);
+publishesRouter.put('/', publishesController.update);
 publishesRouter.delete('/', publishesController.delete);
 
 export default publishesRouter;

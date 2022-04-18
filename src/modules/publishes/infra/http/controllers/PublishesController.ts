@@ -4,6 +4,7 @@ import { instanceToPlain } from 'class-transformer';
 
 import CreatePublishService from '@modules/publishes/services/CreatePublishService';
 import DeletePublishService from '@modules/publishes/services/DeletePublishService';
+import UpdatePublishesSeenService from '@modules/publishes/services/UpdatePublishSeenService';
 import PublishesValidation from '../validations/PublishesValidation';
 
 class PublishesController {
@@ -32,6 +33,22 @@ class PublishesController {
     });
 
     return res.json(instanceToPlain(publish));
+  }
+
+  public async update(req: Request, res: Response): Promise<Response> {
+    const { user_id } = req;
+    const { data } = req.body;
+
+    const updatePublishesSeenService = container.resolve(
+      UpdatePublishesSeenService,
+    );
+
+    await updatePublishesSeenService.execute({
+      user_id,
+      seen_data: data,
+    });
+
+    return res.json();
   }
 
   public async delete(req: Request, res: Response): Promise<Response> {

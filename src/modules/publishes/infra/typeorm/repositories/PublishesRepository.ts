@@ -11,6 +11,7 @@ import IListRecentPublishesDTO, {
 
 import AppError from '@shared/errors/AppError';
 import userProject from '@modules/users/infra/typeorm/mongoProjects/UserProject';
+import IUpdatePublishSeenDTO from '@modules/publishes/dtos/IUpdatePublishSeenDTO';
 import Publish from '../schemas/Publish';
 import publishProject from '../mongoProjects/PublishProject';
 
@@ -184,6 +185,103 @@ class PublishesRepository implements IPublishesRepository {
       .toArray();
 
     return publishes;
+  }
+
+  public async updateSeen({
+    user_id,
+    seen_data,
+  }: IUpdatePublishSeenDTO): Promise<
+    Record<string, { views: number; reactions: number }>
+  > {
+    const parsedUserId = new ObjectId(user_id);
+    const nowDate = new Date();
+
+    const publishIds = seen_data.map(el => new ObjectId(el.publish_id));
+
+    const publishes = await this.ormRepository
+      .aggregate([
+        {
+          $match: {
+            _id: {
+              $in: publishIds,
+            },
+            receivers_seen: {
+              $not: {
+                $elemMatch: {
+                  user_id: parsedUserId,
+                },
+              },
+            },
+          },
+        },
+      ])
+      .toArray();
+
+    const userCounter = {} as Record<
+      string,
+      { views: number; reactions: number }
+    >;
+
+    const updatePublishData = publishes.map(publish => {
+      const creatorId = String(publish.user_id);
+
+      const reaction =
+        seen_data.find(el => el.publish_id === String(publish._id))?.reaction ||
+        null;
+
+      userCounter[creatorId] = {
+        views: 0,
+        reactions: 0,
+
+        ...userCounter[creatorId],
+      };
+
+      userCounter[creatorId].views += 1;
+
+      if (reaction) {
+        userCounter[creatorId].reactions += 1;
+      }
+
+      const incrementData: Partial<
+        Pick<Publish, 'count_reactions' | 'count_seen' | 'range'>
+      > = {
+        count_seen: 1,
+        range: -1,
+      };
+
+      if (reaction) {
+        incrementData.count_reactions = 1;
+      }
+
+      return {
+        updateOne: {
+          filter: {
+            _id: publish._id,
+          },
+          update: {
+            $push: {
+              receivers_seen: {
+                $each: [
+                  {
+                    user_id: parsedUserId,
+                    reaction,
+                    seen_at: nowDate,
+                  },
+                ],
+                $position: 0,
+              },
+            },
+            $inc: incrementData,
+          },
+        },
+      };
+    });
+
+    if (updatePublishData.length) {
+      await this.ormRepository.bulkWrite(updatePublishData);
+    }
+
+    return userCounter;
   }
 }
 
