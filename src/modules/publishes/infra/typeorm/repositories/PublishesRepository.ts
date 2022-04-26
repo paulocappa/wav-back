@@ -62,26 +62,31 @@ class PublishesRepository implements IPublishesRepository {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getListQuery(user_id: ObjectId, list_type: ListType): any {
+    const notElemMatch = {
+      $not: {
+        $elemMatch: {
+          user_id,
+        },
+      },
+    };
+
     switch (list_type) {
       case 'world':
         return {
           to_world: {
             $eq: true,
           },
-          direct_receivers: {
-            $not: {
-              $elemMatch: {
-                user_id,
-              },
+          $and: [
+            {
+              direct_receivers: notElemMatch,
             },
-          },
-          followers_receivers: {
-            $not: {
-              $elemMatch: {
-                user_id,
-              },
+            {
+              followers_receivers: notElemMatch,
             },
-          },
+            {
+              receivers_seen: notElemMatch,
+            },
+          ],
         };
       case 'follower':
         return {

@@ -142,6 +142,19 @@ class UsersRepository implements IUsersRepository {
 
     await this.ormRepository.bulkWrite(formattedData);
   }
+
+  public async updateUserPushNotifications(
+    id_user: string,
+    data: Partial<User['push_settings']>,
+  ): Promise<void> {
+    await this.ormRepository.updateOne(new ObjectId(id_user), {
+      $set: {
+        push_settings: {
+          ...data,
+        },
+      },
+    });
+  }
 }
 
 export default UsersRepository;

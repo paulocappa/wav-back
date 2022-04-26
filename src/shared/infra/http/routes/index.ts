@@ -6,6 +6,7 @@ import passwordRouter from '@modules/users/infra/http/routes/password.routes';
 import publishesRouter from '@modules/publishes/infra/http/routes/publishes.routes';
 import followersRouter from '@modules/followers/infra/http/routes/followers.routes';
 import timelineRouter from '@modules/publishes/infra/http/routes/timeline.routes';
+import pushNotificationsRouter from '@modules/users/infra/http/routes/pushNotifications.routes';
 
 const routes = Router();
 
@@ -13,6 +14,7 @@ const routes = Router();
 routes.use('/users', usersRouter);
 routes.use('/sessions', sessionsRouter);
 routes.use('/password', passwordRouter);
+routes.use('/push', pushNotificationsRouter);
 
 // PUBLISHES
 routes.use('/publishes', publishesRouter);

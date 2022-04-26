@@ -53,7 +53,7 @@ class RedisCacheProvider implements ICacheProvider {
   public async pushToList<T>(key: string, value: T[]): Promise<void> {
     const parsedValue = value.map(v => JSON.stringify(v));
 
-    this.client.lpush(key, ...parsedValue);
+    await this.client.lpush(key, ...parsedValue);
   }
 
   public async recoverFromList<T>({

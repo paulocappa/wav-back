@@ -1,6 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
 
 import type { FieldsToUpdate } from '@modules/users/dtos/IIncrementManyUsersCountDTO';
 import type { SeenData } from '../dtos/IUpdatePublishSeenDTO';
@@ -20,6 +21,9 @@ class UpdatePublishesSeenService {
 
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
+
+    @inject('CacheProvider')
+    private cacheProvider: ICacheProvider,
   ) {}
 
   public async execute({ user_id, seen_data }: IRequest): Promise<void> {
@@ -53,6 +57,8 @@ class UpdatePublishesSeenService {
     if (formatUsersCounter.length) {
       await this.usersRepository.incrementManyUsersCount(formatUsersCounter);
     }
+
+    await this.cacheProvider.invalidatePrefix(`world-timeline:${user_id}`);
   }
 }
 

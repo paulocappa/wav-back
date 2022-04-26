@@ -26,4 +26,8 @@ export default interface IUsersRepository {
   ): Promise<void>;
   updateUserLastAction(data: IUpdateUserLastAction): Promise<void>;
   incrementManyUsersCount(data: IIncrementManyUsersCountDTO[]): Promise<void>;
+  updateUserPushNotifications(
+    user_id: string,
+    data: User['push_settings'],
+  ): Promise<void>;
 }
