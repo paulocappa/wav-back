@@ -12,6 +12,7 @@ import IListRecentPublishesDTO, {
 import AppError from '@shared/errors/AppError';
 import userProject from '@modules/users/infra/typeorm/mongoProjects/UserProject';
 import IUpdatePublishSeenDTO from '@modules/publishes/dtos/IUpdatePublishSeenDTO';
+import IListReceiversSeenDTO from '@modules/publishes/dtos/IListReceiversSeenDTO';
 import Publish from '../schemas/Publish';
 import publishProject from '../mongoProjects/PublishProject';
 
@@ -319,6 +320,71 @@ class PublishesRepository implements IPublishesRepository {
       .toArray();
 
     return publish[0];
+  }
+
+  public async listReceiversSeen({
+    user_id,
+    publish_id,
+    page,
+    per_page,
+  }: IListReceiversSeenDTO): Promise<Publish> {
+    const usersSeen = await this.ormRepository
+      .aggregate<Publish>([
+        {
+          $match: {
+            _id: new ObjectId(publish_id),
+            user_id: new ObjectId(user_id),
+          },
+        },
+        {
+          $project: {
+            receivers_seen: {
+              $slice: ['$receivers_seen', (page - 1) * per_page, per_page],
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            as: 'user',
+            let: { user_id: '$receivers_seen.user_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$_id', '$$user_id'],
+                  },
+                },
+              },
+              {
+                $project: userProject([
+                  'name',
+                  'username',
+                  'avatar',
+                  'location',
+                  'count_followers',
+                  'count_following',
+                ]),
+              },
+            ],
+          },
+        },
+        {
+          $unwind: {
+            path: '$user',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            user: 1,
+            receivers_seen: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return usersSeen[0];
   }
 }
 

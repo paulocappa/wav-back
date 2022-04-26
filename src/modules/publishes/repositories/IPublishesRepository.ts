@@ -1,4 +1,5 @@
 import ICreatePublishDTO from '../dtos/ICreatePublishDTO';
+import IListReceiversSeenDTO from '../dtos/IListReceiversSeenDTO';
 import IListRecentPublishesDTO from '../dtos/IListRecentPublishesDTO';
 import IUpdatePublishSeenDTO from '../dtos/IUpdatePublishSeenDTO';
 
@@ -16,4 +17,5 @@ export default interface IPublishesRepository {
     data: IUpdatePublishSeenDTO,
   ): Promise<Record<string, { views: number; reactions: number }>>;
   listRecentPublishes(data: IListRecentPublishesDTO): Promise<Publish[]>;
+  listReceiversSeen(data: IListReceiversSeenDTO): Promise<Publish>;
 }
