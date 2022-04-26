@@ -5,9 +5,25 @@ import { instanceToPlain } from 'class-transformer';
 import CreatePublishService from '@modules/publishes/services/CreatePublishService';
 import DeletePublishService from '@modules/publishes/services/DeletePublishService';
 import UpdatePublishesSeenService from '@modules/publishes/services/UpdatePublishSeenService';
+import GetPublishInfoService from '@modules/publishes/services/GetPublishInfoService';
+
 import PublishesValidation from '../validations/PublishesValidation';
 
 class PublishesController {
+  public async index(req: Request, res: Response): Promise<Response> {
+    const { user_id } = req;
+    const { publish_id } = req.params;
+
+    const getPublishInfoService = container.resolve(GetPublishInfoService);
+
+    const publish = await getPublishInfoService.execute({
+      user_id,
+      publish_id,
+    });
+
+    return res.json(instanceToPlain(publish));
+  }
+
   public async create(req: Request, res: Response): Promise<Response> {
     await new PublishesValidation().create(req.body);
 

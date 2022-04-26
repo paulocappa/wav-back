@@ -12,8 +12,9 @@ const publishesController = new PublishesController();
 publishesRouter.use(ensureIsAuthenticated);
 publishesRouter.use(ensureEmailIsVerified);
 
+publishesRouter.get('/:publish_id', publishesController.index);
 publishesRouter.post('/', publishesController.create);
 publishesRouter.put('/', publishesController.update);
-publishesRouter.delete('/', publishesController.delete);
+publishesRouter.delete('/:publish_id', publishesController.delete);
 
 export default publishesRouter;

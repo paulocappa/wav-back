@@ -19,9 +19,12 @@ class DeletePublishService {
   ) {}
 
   public async execute({ user_id, publish_id }: IRequest): Promise<void> {
-    const publish = await this.publishesRepository.findById(publish_id);
+    const publish = await this.publishesRepository.findByUserAndPublishId(
+      user_id,
+      publish_id,
+    );
 
-    if (!publish || String(publish.user_id) !== user_id) {
+    if (!publish) {
       throw new AppError('Publish not found');
     }
 

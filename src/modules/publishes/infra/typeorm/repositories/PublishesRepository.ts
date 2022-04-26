@@ -288,6 +288,38 @@ class PublishesRepository implements IPublishesRepository {
 
     return userCounter;
   }
+
+  public async findByUserAndPublishId(
+    user_id: string,
+    publish_id: string,
+  ): Promise<Publish> {
+    const publish = await this.ormRepository
+      .aggregate([
+        {
+          $match: {
+            _id: new ObjectId(publish_id),
+            user_id: new ObjectId(user_id),
+          },
+        },
+        {
+          $project: publishProject([
+            'file',
+            'user_id',
+            'ban_info',
+            'text',
+            'watermark',
+            'to_world',
+            'count_seen',
+            'count_reactions',
+            'created_at',
+            'location',
+          ]),
+        },
+      ])
+      .toArray();
+
+    return publish[0];
+  }
 }
 
 export default PublishesRepository;
