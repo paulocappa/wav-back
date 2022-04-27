@@ -344,15 +344,21 @@ class PublishesRepository implements IPublishesRepository {
           },
         },
         {
+          $unwind: '$receivers_seen',
+        },
+        {
           $lookup: {
             from: 'users',
-            as: 'user',
-            let: { user_id: '$receivers_seen.user_id' },
+            as: 'users',
+            let: {
+              userId: '$receivers_seen.user_id',
+              receivers: '$receivers_seen',
+            },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $eq: ['$_id', '$$user_id'],
+                    $eq: ['$_id', '$$userId'],
                   },
                 },
               },
@@ -366,19 +372,24 @@ class PublishesRepository implements IPublishesRepository {
                   'count_following',
                 ]),
               },
+              {
+                $replaceRoot: {
+                  newRoot: {
+                    $mergeObjects: ['$$receivers', '$$ROOT'],
+                  },
+                },
+              },
             ],
           },
         },
         {
-          $unwind: {
-            path: '$user',
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $project: {
-            user: 1,
-            receivers_seen: 1,
+          $group: {
+            _id: '$_id',
+            receivers_seen: {
+              $push: {
+                $first: '$users',
+              },
+            },
           },
         },
       ])
