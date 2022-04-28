@@ -41,6 +41,7 @@ export const UserExposeFieldsName = [
   { reference: 'count_followers', field: 'formatted_count_followers' },
   { reference: 'count_following', field: 'formatted_count_following' },
 ] as const;
+
 @Entity('users')
 export default class User {
   @ObjectIdColumn()
@@ -124,7 +125,7 @@ export default class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  constructor() {
+  constructor(id: string) {
     this.avatar = null;
     this.count_publishes = 0;
     this.count_reactions = 0;

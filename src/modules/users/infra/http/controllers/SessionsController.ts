@@ -13,14 +13,14 @@ class SessionsController {
 
     const authenticateUserService = container.resolve(AuthenticateUserService);
 
-    const { user, token } = await authenticateUserService.execute({
+    const { user, tokens } = await authenticateUserService.execute({
       email,
       password,
     });
 
     return res.json({
       user: instanceToPlain(user),
-      token,
+      tokens,
     });
   }
 }

@@ -1,11 +1,10 @@
 import { Response, Request, NextFunction } from 'express';
-import { verify, JwtPayload } from 'jsonwebtoken';
 
 import AppError from '@shared/errors/AppError';
 
-import authConfig from '@config/auth';
+import TokenProvider from '@modules/users/providers/TokenProvider/implementations/JWTTokenProvider';
 
-export default function ensureIsAuthenticated(
+export default async function ensureIsAuthenticated(
   req: Request,
   _: Response,
   next: NextFunction,
@@ -19,9 +18,11 @@ export default function ensureIsAuthenticated(
   const token = authHeader.split(' ').pop();
 
   try {
-    const decoded = verify(token, authConfig.jwt.secret) as JwtPayload;
+    const tokenProvider = new TokenProvider();
 
-    req.user_id = decoded.sub;
+    const decoded = await tokenProvider.verify(token);
+
+    req.user_id = decoded;
 
     next();
   } catch (error) {

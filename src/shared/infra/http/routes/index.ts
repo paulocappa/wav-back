@@ -7,8 +7,12 @@ import publishesRouter from '@modules/publishes/infra/http/routes/publishes.rout
 import followersRouter from '@modules/followers/infra/http/routes/followers.routes';
 import timelineRouter from '@modules/publishes/infra/http/routes/timeline.routes';
 import pushNotificationsRouter from '@modules/users/infra/http/routes/pushNotifications.routes';
+import refreshTokenRouter from '@modules/users/infra/http/routes/token.routes';
 
 const routes = Router();
+
+// TOKEN
+routes.use('/token', refreshTokenRouter);
 
 // USERS
 routes.use('/users', usersRouter);
