@@ -52,7 +52,6 @@ class RefreshTokenService {
       },
     });
 
-    console.log(String(refreshToken.id));
     await this.refreshTokenRespository.deleteOne(String(refreshToken.id));
 
     const newRefreshToken = await this.refreshTokenRespository.create(
