@@ -392,6 +392,13 @@ class PublishesRepository implements IPublishesRepository {
             },
           },
         },
+        {
+          $project: {
+            id: '$_id',
+            _id: 0,
+            receivers_seen: 1,
+          },
+        },
       ])
       .toArray();
 

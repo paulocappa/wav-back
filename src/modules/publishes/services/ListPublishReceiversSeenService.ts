@@ -1,5 +1,9 @@
-import AppError from '@shared/errors/AppError';
 import { inject, injectable } from 'tsyringe';
+
+import AppError from '@shared/errors/AppError';
+
+import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
+
 import Publish from '../infra/typeorm/schemas/Publish';
 import IPublishesRepository from '../repositories/IPublishesRepository';
 
@@ -15,6 +19,9 @@ class ListPublishReceiversSeenService {
   constructor(
     @inject('PublishesRepository')
     private publishesRepository: IPublishesRepository,
+
+    @inject('CacheProvider')
+    private cacheProvider: ICacheProvider,
   ) {}
 
   public async execute({
@@ -32,14 +39,20 @@ class ListPublishReceiversSeenService {
       throw new AppError('Publish not found');
     }
 
-    const receivers = await this.publishesRepository.listReceiversSeen({
-      user_id,
-      publish_id,
-      page,
-      per_page,
-    });
+    const cacheKey = `publish-receivers-seen:${publish_id}:${page}:${per_page}`;
 
-    console.log(receivers);
+    let receivers = await this.cacheProvider.recover<Publish>(cacheKey);
+
+    if (!receivers) {
+      receivers = await this.publishesRepository.listReceiversSeen({
+        user_id,
+        publish_id,
+        page,
+        per_page,
+      });
+
+      await this.cacheProvider.save(cacheKey, receivers);
+    }
 
     return receivers;
   }

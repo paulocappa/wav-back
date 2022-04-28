@@ -59,6 +59,14 @@ class UpdatePublishesSeenService {
     }
 
     await this.cacheProvider.invalidatePrefix(`world-timeline:${user_id}`);
+
+    await Promise.all(
+      seen_data.map(async ({ publish_id }) => {
+        const cacheKeyPrefix = `publish-receivers-seen:${publish_id}:*`;
+
+        await this.cacheProvider.invalidatePrefix(cacheKeyPrefix);
+      }),
+    );
   }
 }
 
