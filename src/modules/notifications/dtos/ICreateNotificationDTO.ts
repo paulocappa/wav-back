@@ -5,7 +5,7 @@ interface IRecord {
   to_user_id: string;
 }
 
-interface ICreateReactionNotificationDTO extends IRecord {
+export interface ICreateReactionNotificationDTO extends IRecord {
   reaction: string;
   publish_id: string;
 }

@@ -9,17 +9,18 @@ import {
 } from 'typeorm';
 
 type RecordsDocument = {
-  user_id: string;
+  user_id: ObjectId;
   created_at: Date;
 };
 
-type NotificationRecordFollow = RecordsDocument & {
+export type NotificationRecordFollow = RecordsDocument & {
   type: 'follow';
 };
 
-type NotificationRecordReaction = RecordsDocument & {
+export type NotificationRecordReaction = RecordsDocument & {
   type: 'reaction';
-  publish_id: string;
+  publish_id: ObjectId;
+  reaction: string;
 };
 
 type INotificationsRecords =

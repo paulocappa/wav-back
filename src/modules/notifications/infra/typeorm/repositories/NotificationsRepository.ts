@@ -2,11 +2,14 @@ import { ObjectId } from 'bson';
 import { getMongoRepository, MongoRepository } from 'typeorm';
 
 import ICreateNotificationDTO, {
+  ICreateReactionNotificationDTO,
   TypeNotification,
 } from '@modules/notifications/dtos/ICreateNotificationDTO';
 import INotificationsRepository from '@modules/notifications/repositories/INotificationsRepository';
 
-import Notification from '../schemas/Notification';
+import Notification, {
+  NotificationRecordReaction,
+} from '../schemas/Notification';
 
 type INewRecord<T extends TypeNotification> = Omit<
   ICreateNotificationDTO<T>,
@@ -84,6 +87,42 @@ class NotificationsRepository implements INotificationsRepository {
         },
       },
     );
+  }
+
+  public async createReactionNotifications(
+    data: ICreateReactionNotificationDTO[],
+  ): Promise<void> {
+    const bulkWriteQuery = data.map(el => {
+      const { user_id, to_user_id, publish_id, reaction } = el;
+
+      const record: NotificationRecordReaction = {
+        reaction,
+        type: 'reaction',
+        user_id: new ObjectId(user_id),
+        publish_id: new ObjectId(publish_id),
+        created_at: new Date(),
+      };
+
+      return {
+        updateOne: {
+          filter: {
+            user_id: new ObjectId(to_user_id),
+          },
+          update: {
+            $push: {
+              records: {
+                $each: [record],
+                $position: 0,
+              },
+            },
+          },
+        },
+      };
+    });
+
+    if (bulkWriteQuery.length) {
+      await this.ormRepository.bulkWrite(bulkWriteQuery);
+    }
   }
 
   public async delete(notification_id: string): Promise<void> {

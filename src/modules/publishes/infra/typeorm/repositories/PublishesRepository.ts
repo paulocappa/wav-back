@@ -3,7 +3,9 @@ import { getMongoRepository, MongoRepository } from 'typeorm';
 import { subMonths } from 'date-fns';
 
 import ICreatePublishDTO from '@modules/publishes/dtos/ICreatePublishDTO';
-import IPublishesRepository from '@modules/publishes/repositories/IPublishesRepository';
+import IPublishesRepository, {
+  IUpdateSeenResponse,
+} from '@modules/publishes/repositories/IPublishesRepository';
 
 import IListRecentPublishesDTO, {
   ListType,
@@ -13,8 +15,16 @@ import AppError from '@shared/errors/AppError';
 import userProject from '@modules/users/infra/typeorm/mongoProjects/UserProject';
 import IUpdatePublishSeenDTO from '@modules/publishes/dtos/IUpdatePublishSeenDTO';
 import IListReceiversSeenDTO from '@modules/publishes/dtos/IListReceiversSeenDTO';
+
 import Publish from '../schemas/Publish';
 import publishProject from '../mongoProjects/PublishProject';
+
+interface IUserCounter {
+  [key: string]: {
+    views: number;
+    reactions: number;
+  };
+}
 
 class PublishesRepository implements IPublishesRepository {
   private ormRepository: MongoRepository<Publish>;
@@ -196,16 +206,14 @@ class PublishesRepository implements IPublishesRepository {
   public async updateSeen({
     user_id,
     seen_data,
-  }: IUpdatePublishSeenDTO): Promise<
-    Record<string, { views: number; reactions: number }>
-  > {
+  }: IUpdatePublishSeenDTO): Promise<IUpdateSeenResponse> {
     const parsedUserId = new ObjectId(user_id);
     const nowDate = new Date();
 
     const publishIds = seen_data.map(el => new ObjectId(el.publish_id));
 
     const publishes = await this.ormRepository
-      .aggregate([
+      .aggregate<Publish>([
         {
           $match: {
             _id: {
@@ -223,16 +231,13 @@ class PublishesRepository implements IPublishesRepository {
       ])
       .toArray();
 
-    const userCounter = {} as Record<
-      string,
-      { views: number; reactions: number }
-    >;
+    const userCounter = {} as IUserCounter;
 
     const updatePublishData = publishes.map(publish => {
       const creatorId = String(publish.user_id);
 
       const reaction =
-        seen_data.find(el => el.publish_id === String(publish._id))?.reaction ||
+        seen_data.find(el => el.publish_id === String(publish.id))?.reaction ||
         null;
 
       userCounter[creatorId] = {
@@ -262,7 +267,7 @@ class PublishesRepository implements IPublishesRepository {
       return {
         updateOne: {
           filter: {
-            _id: publish._id,
+            _id: publish.id,
           },
           update: {
             $push: {
@@ -287,7 +292,10 @@ class PublishesRepository implements IPublishesRepository {
       await this.ormRepository.bulkWrite(updatePublishData);
     }
 
-    return userCounter;
+    return {
+      counter: userCounter,
+      publishes,
+    };
   }
 
   public async findByUserAndPublishId(

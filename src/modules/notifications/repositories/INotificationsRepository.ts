@@ -1,4 +1,5 @@
 import ICreateNotificationDTO, {
+  ICreateReactionNotificationDTO,
   TypeNotification,
 } from '../dtos/ICreateNotificationDTO';
 
@@ -8,4 +9,7 @@ export default interface INotificationsRepository {
     data: ICreateNotificationDTO<T>,
   ): Promise<void>;
   delete(notification_id: string): Promise<void>;
+  createReactionNotifications(
+    data: ICreateReactionNotificationDTO[],
+  ): Promise<void>;
 }

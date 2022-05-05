@@ -2,8 +2,10 @@ import { inject, injectable } from 'tsyringe';
 
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
+import INotificationsRepository from '@modules/notifications/repositories/INotificationsRepository';
 
 import type { FieldsToUpdate } from '@modules/users/dtos/IIncrementManyUsersCountDTO';
+import { ICreateReactionNotificationDTO } from '@modules/notifications/dtos/ICreateNotificationDTO';
 import type { SeenData } from '../dtos/IUpdatePublishSeenDTO';
 
 import IPublishesRepository from '../repositories/IPublishesRepository';
@@ -22,17 +24,39 @@ class UpdatePublishesSeenService {
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
 
+    @inject('NotificationsRepository')
+    private notificationsRepository: INotificationsRepository,
+
     @inject('CacheProvider')
     private cacheProvider: ICacheProvider,
   ) {}
 
   public async execute({ user_id, seen_data }: IRequest): Promise<void> {
-    const usersCounter = await this.publishesRepository.updateSeen({
+    const { counter, publishes } = await this.publishesRepository.updateSeen({
       user_id,
       seen_data,
     });
 
-    const formatUsersCounter = Object.entries(usersCounter).map(
+    const reactionNotifications = [] as ICreateReactionNotificationDTO[];
+
+    publishes.forEach(({ id, user_id: creator_id }) => {
+      const publishHasReaction = seen_data.find(
+        ({ publish_id, reaction }) => publish_id === String(id) && !!reaction,
+      );
+
+      if (publishHasReaction) {
+        const { reaction, publish_id } = publishHasReaction;
+
+        reactionNotifications.push({
+          user_id,
+          reaction,
+          publish_id,
+          to_user_id: String(creator_id),
+        });
+      }
+    });
+
+    const formatUsersCounter = Object.entries(counter).map(
       ([userId, counters]) => {
         const fieldsToUpdate: FieldsToUpdate[] = Object.entries(counters).map(
           ([key, value]) => {
@@ -53,6 +77,12 @@ class UpdatePublishesSeenService {
         };
       },
     );
+
+    if (reactionNotifications.length) {
+      await this.notificationsRepository.createReactionNotifications(
+        reactionNotifications,
+      );
+    }
 
     if (formatUsersCounter.length) {
       await this.usersRepository.incrementManyUsersCount(formatUsersCounter);

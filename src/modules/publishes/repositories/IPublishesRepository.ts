@@ -5,6 +5,14 @@ import IUpdatePublishSeenDTO from '../dtos/IUpdatePublishSeenDTO';
 
 import Publish from '../infra/typeorm/schemas/Publish';
 
+export interface IUpdateSeenResponse {
+  publishes: Publish[];
+  counter: {
+    views: number;
+    reactions: number;
+  };
+}
+
 export default interface IPublishesRepository {
   create(data: ICreatePublishDTO): Promise<Publish>;
   findById(publish_id: string): Promise<Publish | null>;
@@ -13,9 +21,7 @@ export default interface IPublishesRepository {
     publish_id: string,
   ): Promise<Publish | null>;
   delete(publish_id: string): Promise<void>;
-  updateSeen(
-    data: IUpdatePublishSeenDTO,
-  ): Promise<Record<string, { views: number; reactions: number }>>;
+  updateSeen(data: IUpdatePublishSeenDTO): Promise<IUpdateSeenResponse>;
   listRecentPublishes(data: IListRecentPublishesDTO): Promise<Publish[]>;
   listReceiversSeen(data: IListReceiversSeenDTO): Promise<Publish>;
 }
