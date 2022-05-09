@@ -37,7 +37,7 @@ class UpdatePublishesSeenService {
       seen_data,
     });
 
-    const reactionNotifications = [] as ICreateReactionNotificationDTO[];
+    const reactionNotifications: ICreateReactionNotificationDTO[] = [];
 
     publishes.forEach(({ id, user_id: creator_id }) => {
       const publishHasReaction = seen_data.find(

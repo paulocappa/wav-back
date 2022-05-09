@@ -8,8 +8,10 @@ import Publish from '../infra/typeorm/schemas/Publish';
 export interface IUpdateSeenResponse {
   publishes: Publish[];
   counter: {
-    views: number;
-    reactions: number;
+    [key: string]: {
+      views: number;
+      reactions: number;
+    };
   };
 }
 

@@ -240,6 +240,13 @@ class PublishesRepository implements IPublishesRepository {
         seen_data.find(el => el.publish_id === String(publish.id))?.reaction ||
         null;
 
+      const incrementData: Partial<
+        Pick<Publish, 'count_reactions' | 'count_seen' | 'range'>
+      > = {
+        count_seen: 1,
+        range: -1,
+      };
+
       userCounter[creatorId] = {
         views: 0,
         reactions: 0,
@@ -251,16 +258,7 @@ class PublishesRepository implements IPublishesRepository {
 
       if (reaction) {
         userCounter[creatorId].reactions += 1;
-      }
 
-      const incrementData: Partial<
-        Pick<Publish, 'count_reactions' | 'count_seen' | 'range'>
-      > = {
-        count_seen: 1,
-        range: -1,
-      };
-
-      if (reaction) {
         incrementData.count_reactions = 1;
       }
 
