@@ -3,6 +3,10 @@ import { v4 as uuid } from 'uuid';
 import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
 import User from '@modules/users/infra/typeorm/schemas/User';
 
+import IUpdateUserLastAction from '@modules/users/dtos/IUpdateUserLastAction';
+import IIncrementManyUsersCountDTO from '@modules/users/dtos/IIncrementManyUsersCountDTO';
+import IDecrementCountUserField from '@modules/users/dtos/IDecrementCountUserField';
+import IIncrementCountUserField from '@modules/users/dtos/IIncrementCountUserField';
 import IUsersRepository from '../IUsersRepository';
 
 class FakeUsersRepository implements IUsersRepository {
@@ -48,6 +52,50 @@ class FakeUsersRepository implements IUsersRepository {
 
     return findedUser;
   }
+
+  public async delete(user_id: string): Promise<void> {
+    const userIndex = this.users.findIndex(user => String(user.id) === user_id);
+
+    this.users.splice(userIndex, 1);
+  }
+
+  public async updateUserLastAction({
+    coordinates,
+    user_id,
+  }: IUpdateUserLastAction): Promise<void> {
+    const user = this.users.find(u => String(u.id) === user_id);
+    const userIndex = this.users.findIndex(u => String(u.id) === user_id);
+
+    if (user) {
+      Object.assign(user, {
+        location: {
+          type: 'Point',
+          coordinates,
+        },
+      });
+
+      this.users[userIndex] = user;
+    }
+  }
+
+  public async updateUserPushNotifications(
+    user_id: string,
+    data: IPushSettings,
+  ): Promise<void> {}
+
+  public async incrementManyUsersCount(
+    data: IIncrementManyUsersCountDTO[],
+  ): Promise<void> {}
+
+  public async decrementFieldCount(
+    user_id: string,
+    data: IDecrementCountUserField,
+  ): Promise<void> {}
+
+  public async incrementFieldCount(
+    user_id: string,
+    data: IIncrementCountUserField,
+  ): Promise<void> {}
 }
 
 export default FakeUsersRepository;

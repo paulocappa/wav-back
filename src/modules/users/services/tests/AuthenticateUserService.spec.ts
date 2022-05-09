@@ -1,13 +1,17 @@
 import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
 import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
+import FakeRefreshTokenRepository from '@modules/users/repositories/fakes/FakeRefreshTokenRepository';
 import FakeCacheProvider from '@shared/container/providers/CacheProvider/fakes/FakeCacheProvider';
+import FakeTokenProvider from '@modules/users/providers/TokenProvider/fakes/FakeTokenProvider';
 import AuthenticateUserService from '@modules/users/services/AuthenticateUserService';
 
 import AppError from '@shared/errors/AppError';
 
 let fakeUsersRepository: FakeUsersRepository;
+let fakeRefreshTokenRepository: FakeRefreshTokenRepository;
 let fakeHashProvider: FakeHashProvider;
 let fakeCacheProvider: FakeCacheProvider;
+let fakeTokenProvider: FakeTokenProvider;
 let authenticateUserService: AuthenticateUserService;
 
 describe('AuthenticateUserService', () => {
@@ -15,11 +19,15 @@ describe('AuthenticateUserService', () => {
     fakeUsersRepository = new FakeUsersRepository();
     fakeHashProvider = new FakeHashProvider();
     fakeCacheProvider = new FakeCacheProvider();
+    fakeRefreshTokenRepository = new FakeRefreshTokenRepository();
+    fakeTokenProvider = new FakeTokenProvider();
 
     authenticateUserService = new AuthenticateUserService(
       fakeUsersRepository,
+      fakeRefreshTokenRepository,
       fakeHashProvider,
       fakeCacheProvider,
+      fakeTokenProvider,
     );
   });
 

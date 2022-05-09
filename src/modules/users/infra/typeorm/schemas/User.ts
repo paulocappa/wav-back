@@ -125,7 +125,7 @@ export default class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  constructor(id: string) {
+  constructor() {
     this.avatar = null;
     this.count_publishes = 0;
     this.count_reactions = 0;

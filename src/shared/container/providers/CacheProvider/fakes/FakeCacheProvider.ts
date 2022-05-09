@@ -1,7 +1,8 @@
+import IRecoverFromList from '../dtos/IRecoverFromList';
 import ICacheProvider from '../models/ICacheProvider';
 
 interface ICacheData {
-  [key: string]: string;
+  [key: string]: string | unknown[];
 }
 
 class FakeCacheProvider implements ICacheProvider {
@@ -12,7 +13,7 @@ class FakeCacheProvider implements ICacheProvider {
   }
 
   public async recover<T>(key: string): Promise<T | null> {
-    const data = this.cache[key];
+    const data = this.cache[key] as string;
 
     if (!data) return null;
 
@@ -31,6 +32,22 @@ class FakeCacheProvider implements ICacheProvider {
     keys.forEach(key => {
       delete this.cache[key];
     });
+  }
+
+  public async invalidateMany(keys: string[]): Promise<void> {
+    keys.forEach(key => {
+      delete this.cache[key];
+    });
+  }
+
+  public async pushToList<T>(key: string, value: T[]): Promise<void> {
+    this.cache[key] = value;
+  }
+
+  public async recoverFromList<T>({ key }: IRecoverFromList): Promise<T[]> {
+    const findKey = this.cache[key] as T[];
+
+    return findKey;
   }
 }
 

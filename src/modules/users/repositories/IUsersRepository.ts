@@ -1,5 +1,3 @@
-import { MongoRepository } from 'typeorm';
-
 import User from '../infra/typeorm/schemas/User';
 
 import ICreateUserDTO from '../dtos/ICreateUserDTO';
@@ -9,7 +7,6 @@ import IDecrementCountUserField from '../dtos/IDecrementCountUserField';
 import IIncrementManyUsersCountDTO from '../dtos/IIncrementManyUsersCountDTO';
 
 export default interface IUsersRepository {
-  get userOrmRepository(): MongoRepository<User>;
   create(data: ICreateUserDTO): Promise<User>;
   save(user: User): Promise<User>;
   delete(user_id: string): Promise<void>;
