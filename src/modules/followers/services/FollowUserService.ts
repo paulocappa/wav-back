@@ -7,6 +7,7 @@ import Follower from '@modules/followers/infra/typeorm/schemas/Follower';
 import IFollowersRepository from '@modules/followers/repositories/IFollowersRepository';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
+import INotificationsRepository from '@modules/notifications/repositories/INotificationsRepository';
 
 interface IRequest {
   user_id: string;
@@ -21,6 +22,9 @@ class FollowUserService {
 
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
+
+    @inject('NotificationsRepository')
+    private notificationsRepository: INotificationsRepository,
 
     @inject('CacheProvider')
     private cacheProvider: ICacheProvider,
@@ -66,6 +70,11 @@ class FollowUserService {
 
     await this.cacheProvider.invalidatePrefix(`user-followers:${user_follow}`);
     await this.cacheProvider.invalidatePrefix(`user-following:${user_id}`);
+
+    await this.notificationsRepository.create('follow', {
+      user_id,
+      to_user_id: user_follow,
+    });
 
     return follower;
   }
