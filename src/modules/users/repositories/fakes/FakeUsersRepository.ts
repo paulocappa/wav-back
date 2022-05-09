@@ -80,7 +80,7 @@ class FakeUsersRepository implements IUsersRepository {
 
   public async updateUserPushNotifications(
     user_id: string,
-    data: IPushSettings,
+    data: User['push_settings'],
   ): Promise<void> {}
 
   public async incrementManyUsersCount(
