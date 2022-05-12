@@ -26,10 +26,11 @@ class UpdateUserPushNotificationsService {
 
     Object.assign(currentPushSettings, data);
 
-    await this.usersRepository.updateUserPushNotifications(
-      user_id,
-      currentPushSettings,
-    );
+    Object.assign(user, {
+      push_settings: currentPushSettings,
+    });
+
+    await this.usersRepository.save(user);
 
     return user;
   }

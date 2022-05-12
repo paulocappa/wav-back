@@ -4,7 +4,6 @@ import { ObjectId } from 'bson';
 import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 
-import IUpdateUserLastAction from '@modules/users/dtos/IUpdateUserLastAction';
 import IIncrementCountUserField from '@modules/users/dtos/IIncrementCountUserField';
 import IDecrementCountUserField from '@modules/users/dtos/IDecrementCountUserField';
 import IIncrementManyUsersCountDTO from '@modules/users/dtos/IIncrementManyUsersCountDTO';
@@ -95,25 +94,6 @@ class UsersRepository implements IUsersRepository {
     );
   }
 
-  public async updateUserLastAction({
-    user_id,
-    coordinates,
-  }: IUpdateUserLastAction): Promise<void> {
-    await this.ormRepository.updateOne(
-      {
-        _id: new ObjectId(user_id),
-      },
-      {
-        $set: {
-          location: {
-            type: 'Point',
-            coordinates,
-          },
-        },
-      },
-    );
-  }
-
   public async incrementManyUsersCount(
     data: IIncrementManyUsersCountDTO[],
   ): Promise<void> {
@@ -137,19 +117,6 @@ class UsersRepository implements IUsersRepository {
     });
 
     await this.ormRepository.bulkWrite(formattedData);
-  }
-
-  public async updateUserPushNotifications(
-    id_user: string,
-    data: Partial<User['push_settings']>,
-  ): Promise<void> {
-    await this.ormRepository.updateOne(new ObjectId(id_user), {
-      $set: {
-        push_settings: {
-          ...data,
-        },
-      },
-    });
   }
 }
 

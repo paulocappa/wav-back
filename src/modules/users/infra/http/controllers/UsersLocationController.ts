@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 
 import UpdateUsersLocationService from '@modules/users/services/UpdateUsersLocationService';
+import { instanceToPlain } from 'class-transformer';
 
 class UsersLocationController {
   public async update(req: Request, res: Response): Promise<Response> {
@@ -11,12 +12,12 @@ class UsersLocationController {
       UpdateUsersLocationService,
     );
 
-    await updateUserLocationService.execute({
+    const user = await updateUserLocationService.execute({
       user_id: req.user_id,
       coordinates: [longitude, latitude],
     });
 
-    return res.status(204).json();
+    return res.json(instanceToPlain(user));
   }
 }
 

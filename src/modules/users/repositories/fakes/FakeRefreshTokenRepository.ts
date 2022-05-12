@@ -23,7 +23,9 @@ class FakeRefreshTokenRepository implements IRefreshTokenRepository {
   public async deleteOne(id: string): Promise<void> {
     const tokenIndex = this.tokens.findIndex(token => String(token.id) === id);
 
-    this.tokens.splice(tokenIndex, 1);
+    if (tokenIndex !== -1) {
+      this.tokens.splice(tokenIndex, 1);
+    }
   }
 
   public async deleteByUserId(user_id: string): Promise<void> {
@@ -31,7 +33,9 @@ class FakeRefreshTokenRepository implements IRefreshTokenRepository {
       token => String(token.user_id) === user_id,
     );
 
-    this.tokens.splice(tokenIndex, 1);
+    if (tokenIndex !== -1) {
+      this.tokens.splice(tokenIndex, 1);
+    }
   }
 
   public async findById(id: string): Promise<RefreshToken> {

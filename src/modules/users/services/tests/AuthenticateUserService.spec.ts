@@ -47,7 +47,7 @@ describe('AuthenticateUserService', () => {
       password,
     });
 
-    expect(auth).toHaveProperty('token');
+    expect(auth).toHaveProperty('tokens');
     expect(auth.user).toEqual(user);
   });
 

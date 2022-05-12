@@ -1,12 +1,10 @@
-import { v4 as uuid } from 'uuid';
-
 import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
 import User from '@modules/users/infra/typeorm/schemas/User';
 
-import IUpdateUserLastAction from '@modules/users/dtos/IUpdateUserLastAction';
 import IIncrementManyUsersCountDTO from '@modules/users/dtos/IIncrementManyUsersCountDTO';
 import IDecrementCountUserField from '@modules/users/dtos/IDecrementCountUserField';
 import IIncrementCountUserField from '@modules/users/dtos/IIncrementCountUserField';
+import { ObjectId } from 'bson';
 import IUsersRepository from '../IUsersRepository';
 
 class FakeUsersRepository implements IUsersRepository {
@@ -20,7 +18,13 @@ class FakeUsersRepository implements IUsersRepository {
   }: ICreateUserDTO): Promise<User> {
     const user = new User();
 
-    Object.assign(user, { id: uuid(), name, email, username, password });
+    Object.assign(user, {
+      id: new ObjectId(),
+      name,
+      email,
+      username,
+      password,
+    });
 
     this.users.push(user);
 
@@ -59,43 +63,44 @@ class FakeUsersRepository implements IUsersRepository {
     this.users.splice(userIndex, 1);
   }
 
-  public async updateUserLastAction({
-    coordinates,
-    user_id,
-  }: IUpdateUserLastAction): Promise<void> {
-    const user = this.users.find(u => String(u.id) === user_id);
-    const userIndex = this.users.findIndex(u => String(u.id) === user_id);
+  public async incrementManyUsersCount(
+    data: IIncrementManyUsersCountDTO[],
+  ): Promise<void> {
+    data.forEach(el => {
+      const user = this.users.find(u => String(u.id) === el.user_id);
+      const userIndex = this.users.findIndex(u => String(u.id) === el.user_id);
 
-    if (user) {
-      Object.assign(user, {
-        location: {
-          type: 'Point',
-          coordinates,
-        },
+      el.fieldsToUpdate.forEach(({ field, count }) => {
+        user[field] += count;
       });
 
       this.users[userIndex] = user;
-    }
+    });
   }
-
-  public async updateUserPushNotifications(
-    user_id: string,
-    data: User['push_settings'],
-  ): Promise<void> {}
-
-  public async incrementManyUsersCount(
-    data: IIncrementManyUsersCountDTO[],
-  ): Promise<void> {}
 
   public async decrementFieldCount(
     user_id: string,
-    data: IDecrementCountUserField,
-  ): Promise<void> {}
+    { field, count = 1 }: IDecrementCountUserField,
+  ): Promise<void> {
+    const user = this.users.find(u => String(u.id) === user_id);
+    const userIndex = this.users.findIndex(u => String(u.id) === user_id);
+
+    user[field] -= count;
+
+    this.users[userIndex] = user;
+  }
 
   public async incrementFieldCount(
     user_id: string,
-    data: IIncrementCountUserField,
-  ): Promise<void> {}
+    { field, count = 1 }: IIncrementCountUserField,
+  ): Promise<void> {
+    const user = this.users.find(u => String(u.id) === user_id);
+    const userIndex = this.users.findIndex(u => String(u.id) === user_id);
+
+    user[field] += count;
+
+    this.users[userIndex] = user;
+  }
 }
 
 export default FakeUsersRepository;
